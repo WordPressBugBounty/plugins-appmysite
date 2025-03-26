@@ -6,7 +6,7 @@ Tested up to: 6.7.2
 Requires PHP: 7.4
 WC tested up to: 9.7.1
 WC requires at least: 7.5
-Stable tag: 3.13.0
+Stable tag: 3.13.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -309,8 +309,11 @@ Thank you [WordPress](http://wordpress.org/) and [WooCommerce](https://woocommer
 * Added wishlist feature for saving desired products for later.
 * General bug fixes
 
-= 3.13.0 (22nd October, 2024) =
+= 3.13.0 (26th March, 2025) =
 * Added bookmarks feature for saving and accessing favorite content.
+* General bug fixes
+
+= 3.13.1 (26th March, 2025) =
 * General bug fixes
 
 == Upgrade Notice ==
