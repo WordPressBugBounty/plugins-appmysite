@@ -26,9 +26,12 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 
 			add_action( 'admin_menu', array( &$this, 'ams_admin_menu' ) );
 			
-			add_action( 'wp_ajax_ams_license_key_form_submit', array( &$this, 'ams_license_key_form_submit' ) );
+			//add_action( 'wp_ajax_ams_license_key_form_submit', array( &$this, 'ams_license_key_form_submit' ) ); 
+			//commented this function to hook with wp_ajax because connection to V2 was resulting as forbidden in simple ajax call, so implemented it as jquery ajax call in save_ams_license_key
 			
 			add_action( 'wp_ajax_ams_safe_mode_form_submit', array( &$this, 'ams_safe_mode_form_submit' ) );
+
+			add_action('wp_ajax_save_ams_license_key', array( &$this, 'save_ams_license_key' ) );
 			
 		}
 		
@@ -56,9 +59,57 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 			// Load home page
 			require_once untrailingslashit( dirname( AMS_PLUGIN_DIR )) . '/includes/views/ams-home.php'; 
 		}
+
+		function save_ams_license_key() {
+			
+			// Get the license key from the POST request
+			if (isset($_POST['ams_license_key'])) {
+				$ams_license_key = sanitize_text_field($_POST['ams_license_key']);
+				
+				// Validate the license key before saving (you can add custom validation here)
+				if (strlen($ams_license_key) > 28 && strlen($ams_license_key) <= 34) {
+					try {
+						$config_transformer = new WPConfigTransformer($this->get_config_path());
+						$config_param = $this->get_config_args(array('normalize' => true));
+		
+						// Check if constant exists, then update or add the constant in wp-config.php
+						if ($config_transformer->exists('constant', 'AMS_LICENSE_KEY')) {
+							$config_transformer->update('constant', 'AMS_LICENSE_KEY', $ams_license_key, $config_param);
+							$config_transformer->update('constant', 'AMS_LICENSE_STATUS', 'Verified', $config_param);
+						} else {
+							$config_transformer->update('constant', 'AMS_LICENSE_KEY', $ams_license_key, $config_param);
+							$config_transformer->update('constant', 'AMS_LICENSE_STATUS', 'Verified', $config_param);
+						}
+		
+						wp_send_json_success(array(
+							'is_valid' => "yes",
+							'msg' => 'License key saved successfully.'
+						));
+					} catch (\Exception $e) {
+						$message = 'Unable to update AMS_LICENSE_KEY in wp-config. ' . $e->getMessage();
+						wp_send_json_error(array(
+							'is_valid' => "no",
+							'msg' => $message
+						));
+					}
+				} else {
+					wp_send_json_error(array(
+						'is_valid' => "no",
+						'msg' => 'Invalid license key format.'
+					));
+				}
+			} else {
+				wp_send_json_error(array(
+					'is_valid' => "no",
+					'msg' => 'License key not provided.'
+				));
+			}
+		
+			wp_die(); // Always call this to terminate the request properly
+		}
 		
 		
-		function ams_license_key_form_submit() { 
+		/*function ams_license_key_form_submit() { 
 
 			if ( ! check_ajax_referer( 'ajax-nonce', 'nonce', false ) ) {
 				wp_send_json_error();
@@ -68,12 +119,12 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 			
 			$ams_license_key = sanitize_text_field($form_data['ams_license_key']);
 			$site_url = esc_url( get_bloginfo( 'url' ) );
-			$is_valid_ams_license_key = false;
+			$is_valid_ams_license_key = false;*/
 						
 			/**
 			 * Make a POST request to verify the token.
 			 */
-			$response    = wp_remote_post(
+			/*$response    = wp_remote_post(
 				'https://wordpress.api.appmysite.com/api/verify-license',
 				array(
 					'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
@@ -90,7 +141,7 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 					$json_response = json_decode($response_body, true);
 					if(isset($json_response['is_valid'])&& $json_response['is_valid']=="yes"){		//Valid license				
 						/*  Logic to modify wp-config file  */
-						try {
+						/*try {
 							$config_transformer = new WPConfigTransformer( $this->get_config_path() );
 							
 							$config_param = $this->get_config_args(array( 'normalize' => true ));
@@ -177,7 +228,7 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 				wp_die();
 			}
 			
-		}
+		}*/
 
 		function ams_safe_mode_form_submit() { 
 

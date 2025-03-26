@@ -1,11 +1,12 @@
 === AppMySite - Create an app with the Best Mobile App Builder ===
 Contributors: appmysite
 Tags: mobile app builder,app creator,create app
-Requires at least: 6.4
-Tested up to: 6.5.4
+Requires at least: 6.6
+Tested up to: 6.7.2
 Requires PHP: 7.4
-WC tested up to: 9.0.1
-Stable tag: 3.12.0
+WC tested up to: 9.7.1
+WC requires at least: 7.5
+Stable tag: 3.13.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +14,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Build premium mobile apps with the AppMySite <strong>[Mobile App Builder](https://www.appmysite.com/)</strong>. Redefine your online business with native apps for both Android and iOS.
 
-[youtube https://www.youtube.com/watch?v=EuE82P5377E]
+[youtube https://www.youtube.com/watch?v=SzngP_QWgKA]
 
 Create your own app with AppMySite’s free app maker by simply following steps below:
 
@@ -42,85 +43,89 @@ Some of the many salient features of AppMySite’s online app builder are:
 * **Native Mobile Apps**
 Create a native mobile app from your WordPress website and offer your app users an authentic mobile app experience.
 
-* **Multi-platform support
+* **Multi-platform support**
 Make premium mobile apps for both Android and iOS platforms using your WordPress and WooCommerce websites.
 
-* **No coding required
+* **No coding required**
 Build WordPress & WooCommerce apps on AppMySite without writing a single line of code. Breeze through app development with simple no-code workflows.
 
-* **Real-time website-app sync
+* **Real-time website-app sync**
 Sync your website with your app in real time. Ensure every change you make on your website reflects instantly and automatically on your mobile app.
 
-* **Deep WooCommerce integration
+* **Deep WooCommerce integration**
 Connect your WooCommerce store and app to sync products, categories, and other data to the native interface of your mobile app. 
 
-* **Support for custom post types & taxonomies
+* **Support for custom post types & taxonomies**
 Sync content created with third-party plugins and themes to your mobile app. Show any custom post type or taxonomy in your app’s side menu and bottom bar. 
 
-* **Instant App Delivery
+* **Instant App Delivery**
 Make your own app in minutes. Download your ready-to-publish builds from AppMySite when you are done building your app.
 
-* **Affordable subscription plans
+* **Affordable subscription plans**
 Choose from a range of flexible and affordable subscription plans that match your needs.
 
-* **Automatically import website menu
+* **Automatically import website menu**
 Import your WordPress website menu to the app automatically. Additionally, you can create your own menu with AppMySite as well. 
 
-* **Universal payment gateway support
+* **Universal payment gateway support**
 AppMySite supports any payment gateway integrated with your WooCommerce store. The payment gateway on your website will seamlessly integrate with your app as well.
 
-* **Universal shipping support
+* **Universal shipping support**
 AppMySite will show all shipping methods active on your WooCommerce store in your app. No matter which plugin you’re using to customize and add shipping methods, AppMySite will be able to support it. 
 
-* **Personalized app design
+* **Personalized app design**
 Customize your mobile app with a range of options to design app icon, launch screen, log-in & sign-up screens, and color theme.
 
-* **Customize the design
+* **Customize the design**
 Manage categories, add unlimited products, arrange sections, integrate CMS pages, and get access to your blogs, all from the home screen of your app.
 
-* **Enhanced web-view
+* **Enhanced web-view**
 Showcase your app home screen and internal screens in a highly optimized web-view environment.
 
-* **Multi-platform app preview
+* **Multi-platform app preview**
 Preview your app on both Android and iOS emulators. Get multiple device options with each emulator to thoroughly test your app.
 
-* **Real device testing
+* **Real device testing**
 Test your mobile app on a real smartphone with the AppMySite demo app. Evaluate your app performance and design in a real mobile environment.
 
-* **Cart and Checkout Integration
+* **Cart and Checkout Integration**
 Get an efficient cart & seamless checkout for your WooCommerce app. Ensure the best shopping experience for your customers.
 
-* **Smart filter & sort options
+* **Smart filter & sort options**
 Use smart filters, search, and sort options for enhanced discovery within your WordPress and WooCommerce apps.
 
-* **Smart menu navigation
+* **Smart menu navigation**
 Create your app’s side menu and bottom bar from scratch. Add items, select icons, and set item types to configure your app menus. You can also sync your website’s menu to the app. 
 
-* **One-click chat integration
+* **One-click chat integration**
 Integrate your website’s chat software with the app and chat with your customers directly. Resolve any issues your customers face by offering one-click chat options and optimizing customer support. 
 
-* **Analytics for your app
+* **Analytics for your app**
 Understand your app usage better with the Analytics feature. Track app traffic, downloads, most searched terms, popular screens, and more. 
 
-* **Auto-publish your iOS app
+* **Auto-publish your iOS app**
 Automatically submit new versions of your iOS app to the Apple App Store. Simply submit new iOS builds from within your AppMySite account. 
 
-* **Add unlimited CMS pages
+* **Add unlimited CMS pages**
 Add unlimited CMS pages to your app. Display all essential pages from your website including about us, privacy policy, contact, and more.
 
-* **Social Media Integration
+* **Social Media Integration**
 Integrate your social media handles with your mobile app and grow visibility on key online platforms.
-Simplified user login
-Simple user onboarding with options to log in with Google, Facebook, and email accounts. Additionally, you can enable guest browsing and checkout.
-Extensive add-on library
-Simplify your app-making journey with a range of add-ons designed to improve your app on different levels.
-Invite team members
-Collaborate with your team members and work together to build a perfect mobile app on AppMySite.
-Multilingual support
-Enable your app users and customers to choose the language of their choice within the app.
-Extensive knowledge base
-Find extensive guides, video walkthroughs, and FAQ sections explaining the process of creating a mobile app on AppMySite.
 
+* **Simplified user login**
+Simple user onboarding with options to log in with Google, Facebook, and email accounts. Additionally, you can enable guest browsing and checkout.
+
+* **Extensive add-on library**
+Simplify your app-making journey with a range of add-ons designed to improve your app on different levels.
+
+* **Invite team members**
+Collaborate with your team members and work together to build a perfect mobile app on AppMySite.
+
+* **Multilingual support**
+Enable your app users and customers to choose the language of their choice within the app.
+
+* **Extensive knowledge base**
+Find extensive guides, video walkthroughs, and FAQ sections explaining the process of creating a mobile app on AppMySite.
 
 
 == Installation ==
@@ -300,12 +305,18 @@ Thank you [WordPress](http://wordpress.org/) and [WooCommerce](https://woocommer
 * A bug that prevented our plugin from being activated on non-English WordPress installs has been resolved.
 * General bug fixes
 
-= 3.12.0 (21st June, 2024) =
-* New Bookmark feature added for posts
-* New Wishlist feature added for products
-* General bug fixes and optimizations
+= 3.12.0 (18th June, 2024) =
+* Added wishlist feature for saving desired products for later.
+* General bug fixes
+
+= 3.13.0 (22nd October, 2024) =
+* Added bookmarks feature for saving and accessing favorite content.
+* General bug fixes
 
 == Upgrade Notice ==
+
+= 3.12.0 =
+An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.
 
 = 3.11.2 =
 An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.

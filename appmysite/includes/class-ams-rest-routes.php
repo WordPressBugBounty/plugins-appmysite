@@ -302,16 +302,16 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 					);
 					
 					register_rest_route('wc/v3', '/ams-user-wishlist', array(
-					'methods' => 'POST',
+					'methods' => 'GET',
 					'callback' => array($this,'ams_ls_user_wishlist'),
 					'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
-					'args' => array(
-							'user_id' => array(
-								'required' => true,
-								'type' => 'integer',
-								'description' => 'User ID',
-							)
-						) ,
+						// 'args' => array(
+						// 		'user_id' => array(
+						// 			'required' => true,
+						// 			'type' => 'integer',
+						// 			'description' => 'User ID',
+						// 		)
+						// 	) ,
 					));
 					
 					register_rest_route('wc/v3', '/ams-user-wishlist/add', array(
@@ -324,9 +324,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 								'type' => 'integer',
 								'description' => 'User ID',
 							),
-							'product_id' => array(
+							'product_ids' => array(
 								'required' => true,
-								'type' => 'integer',
+								'type'     => 'array',
 								'description' => 'Product ID',
 							)
 						) ,
@@ -342,9 +342,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 								'type' => 'integer',
 								'description' => 'User ID',
 							),
-							'product_id' => array(
+							'product_ids' => array(
 								'required' => true,
-								'type' => 'integer',
+								'type'     => 'array',
 								'description' => 'Product ID',
 							)
 						) ,
@@ -362,7 +362,68 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 							)
 						) ,
 					));
-					
+
+					register_rest_route('wc/v3', '/ams-user-bookmarks', array(
+						'methods' => 'GET',
+						'callback' => array($this,'ams_ls_user_bookmarks'),
+						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						// 'args' => array(
+						// 	'user_id' => array(
+						// 		'required' => true,
+						// 		'type' => 'integer',
+						// 		'description' => 'User ID',
+						// 	)
+						// ) ,
+					));
+						
+					register_rest_route('wc/v3', '/ams-user-bookmarks/add', array(
+						'methods' => 'POST',
+						'callback' => array($this,'ams_ls_user_bookmarks_add'),
+						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						'args' => array(
+								'user_id' => array(
+									'required' => true,
+									'type' => 'integer',
+									'description' => 'User ID',
+								),
+								'post_ids' => array(
+									'required' => true,
+									'type'     => 'array',
+									'description' => 'Post ID',
+								)
+							) ,
+						));
+						
+					register_rest_route('wc/v3', '/ams-user-bookmarks/remove', array(
+						'methods' => 'POST',
+						'callback' => array($this,'ams_ls_user_bookmarks_remove'),
+						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						'args' => array(
+								'user_id' => array(
+									'required' => true,
+									'type' => 'integer',
+									'description' => 'User ID',
+								),
+								'post_ids' => array(
+									'required' => true,
+									'type'     => 'array',
+									'description' => 'Post ID',
+								)
+							) ,
+						));
+						
+					register_rest_route('wc/v3', '/ams-user-bookmarks/clear', array(
+						'methods' => 'POST',
+						'callback' => array($this,'ams_ls_user_bookmarks_clear'),
+						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						'args' => array(
+								'user_id' => array(
+									'required' => true,
+									'type' => 'integer',
+									'description' => 'User ID',
+								)
+							) ,
+						));
 					
 				}
 			);
@@ -976,7 +1037,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 					//$user->data->expire = $expiration + ( 12 * HOUR_IN_SECONDS );
 					$user->data->cookie_hash = $cookie_hash;
 					$user->data->wordpress_logged_in_ = wp_generate_auth_cookie($user->ID, $expiration, 'logged_in');
-					$user->data->wordpress_ = wp_generate_auth_cookie($user->ID, $expiration, 'secure_auth');						
+					$user->data->wordpress_ = wp_generate_auth_cookie($user->ID, $expiration, 'secure_auth');
+					
 				########################################
 				return rest_ensure_response( $user->data );
 			} else {
@@ -1474,7 +1536,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$page = $param['page'];
 			}
 			
-			$user_id = sanitize_text_field($request->get_param('user_id'));
+			$user_id = $request->get_param('user_id');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1486,34 +1548,47 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				//implement wishlist 				
 				$ams_wishlist = get_user_meta($user_id, 'ams_wishlist', true);
 				
-				if(gettype($ams_wishlist)!="array"){
+				if(gettype($ams_wishlist)!="array" || empty($ams_wishlist)){
 					return rest_ensure_response( [] );
 				}
 				
-				###########Pagination Logic####################################				
+				###########Pagination Logic####################################	
+				$ams_wishlist = array_reverse($ams_wishlist);  // reverse for latest first
 				$total_records = count($ams_wishlist);
-				$total_pages   = ceil($total_records / $per_page);
-				if ($page > $total_pages) {
-					$page = $total_pages;
+				$total_pages   = ceil($total_records / $per_page); 
+				if ($page > $total_pages) { 
+					return rest_ensure_response( [] );
+					//$page = $total_pages;
 				}
 				if ($page < 1) {
 					$page = 1;
 				}
 				$offset = ($page - 1) * $per_page;
-				$ams_wishlist = array_slice($ams_wishlist, $offset, $per_page);								
+				$ams_wishlist = array_slice($ams_wishlist, $offset, $per_page);							
 				###########End Pagination######################################
-								
+				
+				// Ensure that all items in $ams_bookmarks are arrays, and filter out any non-arrays
+				$ams_wishlist = array_filter($ams_wishlist, 'is_array');
+				if (empty($ams_wishlist)) {
+					return rest_ensure_response([]);
+				}
+				
+				// Merge arrays
+				$ams_wishlist_int = array_map('intval', array_merge(...$ams_wishlist));
+				//echo '<br>here'; print_r($ams_wishlist_int); die;
 				###########Retrieve The Products###############################
 				$request    = new WP_REST_Request( 'GET', '/wc/v3/products' );
-				$parameters = array( 'include' => $ams_wishlist );				
+				$parameters = array( 'include' => $ams_wishlist_int );				
+					
 				if ( ! empty( $per_page ) ) {
 					$parameters += array( 'per_page' => 99 );
-				}
-				$request->set_query_params( $parameters );
+				} 
+				$request->set_query_params( $parameters ); 
 				$response = rest_do_request( $request );
 				$server   = rest_get_server();
 				$data     = $server->response_to_data( $response, false );
 				return rest_ensure_response( $data );
+
 				###########End Retrieve The Products###############################
 				
 			} else {
@@ -1521,10 +1596,10 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			}
 		}
 		
-		public function ams_ls_user_wishlist_add( WP_REST_Request $request ) {  
-
-			$user_id = sanitize_text_field($request->get_param('user_id'));
-			$product_id = sanitize_text_field($request->get_param('product_id'));
+		public function ams_ls_user_wishlist_add( WP_REST_Request $request ) {    //done
+			
+			$user_id = $request->get_param('user_id');
+			$product_id = $request->get_param('product_ids');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1537,14 +1612,14 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				
 				$user_wishlist = get_user_meta($user_id, 'ams_wishlist', true);		//this will return a array.
 														
-					if ( metadata_exists( 'user', $user_id, 'ams_wishlist' ) ) { 
-												
-						if(is_array($user_wishlist)){ //echo("before");
-							if(!in_array($product_id,$user_wishlist)){
-
-								array_push($user_wishlist,$product_id);
-								array_unique($user_wishlist);
-								
+					if ( metadata_exists( 'user', $user_id, 'ams_wishlist' ) ) {  
+										
+						if(is_array($user_wishlist)){
+							$ams_wishlist_formatted = array_map('intval', array_merge(...$user_wishlist));
+							
+							if(!in_array($product_id,$user_wishlist)){ 
+								$merged_wishlist = array_unique(array_merge($ams_wishlist_formatted, $product_id));
+								$user_wishlist = [$merged_wishlist];
 							}else{
 								//do nothing ad product already exixts
 								return new WP_Error( 'ams_error', 'Resource already exixts.', array( 'status' => 409 ) );
@@ -1553,15 +1628,24 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						}else{
 							$user_wishlist=[$product_id]; //create a new array with given post
 						}
-
 						update_user_meta($user_id, 'ams_wishlist', $user_wishlist);
-					}else{
-						$user_wishlist=[$product_id]; //create a new array with given post
-						update_user_meta($user_id, 'ams_wishlist', $user_wishlist);						
+						/*******************************************************************/
+						$wishlistArray = get_user_meta($user_id, 'ams_wishlist', true); 
+						if (is_array($wishlistArray) && !empty($wishlistArray)) {
+							foreach($wishlistArray[0] as $keys => $values){
+								$innerArray[] = $values;
+							}
+							$wishlist = array_values($innerArray);
+						}
+						/*******************************************************************/
+						
+					}else{ 
+						$user_wishlist = $product_id; //create a new array with given product
+						update_user_meta($user_id, 'ams_wishlist', $user_wishlist);
+						$wishlist = get_user_meta($user_id, 'ams_wishlist', true); 		
 					}
 													
-				//print_r($user_wishlist);
-				return rest_ensure_response( get_user_meta($user_id, 'ams_wishlist', true));
+				return rest_ensure_response($wishlist);
 			} else {
 				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
 			}
@@ -1569,8 +1653,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		
 		public function ams_ls_user_wishlist_remove( WP_REST_Request $request ) {  
 
-			$user_id = sanitize_text_field($request->get_param('user_id'));
-			$product_id = sanitize_text_field($request->get_param('product_id'));
+			$user_id = $request->get_param('user_id');
+			$product_id = $request->get_param('product_ids');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1580,17 +1664,46 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				//implement wishlist 
-				
 				$user_wishlist = get_user_meta($user_id, 'ams_wishlist', true);		//this will return a array.
 				
-				if (($key = array_search($product_id, $user_wishlist)) !== false) {
-						unset($user_wishlist[$key]);
-				}else{
-					return new WP_Error( 'ams_error', 'Resource not found.', array( 'status' => 409 ) );
+				if (empty($user_wishlist)) {
+					return rest_ensure_response([]);  // Return empty if no wishlist items exist
 				}
-				update_user_meta($user_id, 'ams_wishlist', $user_wishlist);				
+
+				$ams_wishlist_formatted = array_map('intval', array_merge(...$user_wishlist)); //this conversion is needed to check the post ids in user_wishlist nested array
+				$found_ids = array_intersect($product_id, $ams_wishlist_formatted);
 				
-				return rest_ensure_response( get_user_meta($user_id, 'ams_wishlist', true));
+				if (!empty($found_ids)) {
+					// Remove found product IDs from wishlist
+					$updated_wishlist = array_diff($ams_wishlist_formatted, $found_ids);
+
+					if (empty($updated_wishlist)) {
+						update_user_meta($user_id, 'ams_wishlist', []);  
+                		return rest_ensure_response([]);
+					} else {
+						// Reformat wishlist back into the original nested format
+						$nested_wishlist = [array_values($updated_wishlist)];
+						// Update user meta with new wishlist
+						update_user_meta($user_id, 'ams_wishlist', $nested_wishlist);
+					}
+				}else{ 
+					return rest_ensure_response($ams_wishlist_formatted);
+				}
+
+				/*******************************************************************/
+				$wishlistsArray = get_user_meta($user_id, 'ams_wishlist', true);
+				if (is_array($wishlistsArray) && !empty($wishlistsArray)) {
+					$updated_wishlist = [];
+					foreach($wishlistsArray[0] as $keys => $values){
+						$innerArray[] = $values;
+					}
+					$wishlists = array_values($innerArray);
+				}else {
+					$wishlists = [];
+				}
+				/*******************************************************************/
+				return rest_ensure_response($wishlists);
+				
 			} else {
 				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
 			}
@@ -1630,7 +1743,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$page = $param['page'];
 			}
 			
-			$user_id = sanitize_text_field($request->get_param('user_id'));
+			$user_id = $request->get_param('user_id');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1639,29 +1752,41 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$error->add( 'message', __( $error_message . '' ) );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
-				//implement wishlist 				
+				//implement bookmark 				
 				$ams_bookmarks = get_user_meta($user_id, 'ams_bookmarks', true);
-				
-				if(gettype($ams_bookmarks)!="array"){
+				if(gettype($ams_bookmarks)!="array" || empty($ams_bookmarks)){ 
 					return rest_ensure_response( [] );
 				}
-				
-				###########Pagination Logic####################################				
+
+				###########Pagination Logic####################################
+				$ams_bookmarks = array_reverse($ams_bookmarks);  // reverse for latest first				
 				$total_records = count($ams_bookmarks);
 				$total_pages   = ceil($total_records / $per_page);
 				if ($page > $total_pages) {
-					$page = $total_pages;
+					//$page = $total_pages; //commented to return function if bookmark is empty before going to list posts
+					return rest_ensure_response( [] );
 				}
 				if ($page < 1) {
 					$page = 1;
 				}
 				$offset = ($page - 1) * $per_page;
-				$ams_bookmarks = array_slice($ams_bookmarks, $offset, $per_page);	
+				$ams_bookmarks = array_slice($ams_bookmarks, $offset, $per_page);
+				###########End Pagination######################################	
+
+				// Ensure that all items in $ams_bookmarks are arrays, and filter out any non-arrays
+				$ams_bookmarks = array_filter($ams_bookmarks, 'is_array');
 				
+				if (empty($ams_bookmarks)) {
+					return rest_ensure_response([]);
+				}
+
+				// Merge arrays
+				$ams_bookmark_int = array_map('intval', array_merge(...$ams_bookmarks));
 				
 				###########Retrieve The Products###############################
 				$request    = new WP_REST_Request( 'GET', '/wp/v2/posts' );
-				$parameters = array( 'include' => $ams_bookmarks );				
+				$parameters = array( 'include' => $ams_bookmark_int);
+
 				if ( ! empty( $per_page ) ) {
 					$parameters += array( 'per_page' => 99 );
 				}
@@ -1669,7 +1794,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$response = rest_do_request( $request );
 				$server   = rest_get_server();
 				$data     = $server->response_to_data( $response, false );
+				
 				return rest_ensure_response( $data );
+
 				###########End Retrieve The Products###############################
 				
 			} else {
@@ -1679,8 +1806,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		
 		public function ams_ls_user_bookmarks_add( WP_REST_Request $request ) {  
 
-			$user_id = sanitize_text_field($request->get_param('user_id'));
-			$post_id = sanitize_text_field($request->get_param('post_id'));
+			$user_id = $request->get_param('user_id');
+			$post_ids = $request->get_param('post_ids');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1689,35 +1816,44 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$error->add( 'message', __( $error_message . '' ) );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
-				//implement wishlist 
+				//implement bookmark 
 				
 				$ams_bookmarks = get_user_meta($user_id, 'ams_bookmarks', true);		//this will return a array.
 														
-					if ( metadata_exists( 'user', $user_id, 'ams_bookmarks' ) ) { 
-												
-						if(is_array($ams_bookmarks)){ //echo("before");
-							if(!in_array($post_id,$ams_bookmarks)){
-
-								array_push($ams_bookmarks,$post_id);
-								array_unique($ams_bookmarks);
-								
-							}else{
-								//do nothing ad product already exixts
-								return new WP_Error( 'ams_error', 'Resource already exixts.', array( 'status' => 409 ) );
-							}
-							
+				if ( metadata_exists( 'user', $user_id, 'ams_bookmarks' ) ) { 
+											
+					if(is_array($ams_bookmarks)){
+						$ams_bookmark_formatted = array_map('intval', array_merge(...$ams_bookmarks));
+						
+						if(!in_array($post_ids,$ams_bookmark_formatted)){
+							$merged_bookmarks = array_unique(array_merge($ams_bookmark_formatted, $post_ids));
+							$ams_bookmarks = [$merged_bookmarks];
 						}else{
-							$ams_bookmarks=[$post_id]; //create a new array with given post
+							//do nothing ad product already exixts
+							return new WP_Error( 'ams_error', 'Resource already exixts.', array( 'status' => 409 ) );
 						}
-
-						update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);
+						
 					}else{
-						$ams_bookmarks=[$post_id]; //create a new array with given post
-						update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);						
+						$ams_bookmarks=[$post_ids]; //create a new array with given post
 					}
-													
-				//print_r($ams_bookmarks);
-				return rest_ensure_response( get_user_meta($user_id, 'ams_bookmarks', true));
+					update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);
+					/*******************************************************************/
+					$bookmarksArray = get_user_meta($user_id, 'ams_bookmarks', true); 
+					if (is_array($bookmarksArray) && !empty($bookmarksArray)) {
+						foreach($bookmarksArray[0] as $keys => $values){
+							$innerArray[] = $values;
+						}
+						$bookmarks = array_values($innerArray);
+					}
+					/*******************************************************************/
+					
+				}else{
+					$ams_bookmarks = $post_ids; //create a new array with given post
+					update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);
+					$bookmarks = get_user_meta($user_id, 'ams_bookmarks', true); 						
+				}
+
+				return rest_ensure_response($bookmarks);
 			} else {
 				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
 			}
@@ -1725,8 +1861,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		
 		public function ams_ls_user_bookmarks_remove( WP_REST_Request $request ) {  
 
-			$user_id = sanitize_text_field($request->get_param('user_id'));
-			$post_id = sanitize_text_field($request->get_param('post_id'));
+			$user_id = $request->get_param('user_id');
+			$post_ids = $request->get_param('post_ids');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1735,18 +1871,43 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$error->add( 'message', __( $error_message . '' ) );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
-				//implement wishlist 
-				
+				//implement bookmarks
 				$ams_bookmarks = get_user_meta($user_id, 'ams_bookmarks', true);		//this will return a array.
 				
-				if (($key = array_search($post_id, $ams_bookmarks)) !== false) {
-						unset($ams_bookmarks[$key]);
-				}else{
-					return new WP_Error( 'ams_error', 'Resource not found.', array( 'status' => 409 ) );
+				if (empty($ams_bookmarks)) {
+					return rest_ensure_response([]);  // Return empty if no bookmarks exist
 				}
-				update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);				
+
+				$ams_bookmark_formatted = array_map('intval', array_merge(...$ams_bookmarks)); //this conversion is needed to check the post ids in ams_bookmark nested array
+				$found_ids = array_intersect($post_ids, $ams_bookmark_formatted);
+
+				if(!empty($found_ids)){
+					$updated_bookmarks = array_diff($ams_bookmark_formatted, $found_ids);
+					if(empty($updated_bookmarks)){
+						update_user_meta($user_id, 'ams_bookmarks', []);
+                		return rest_ensure_response([]);  
+					}else{
+						$nested_bookmarks = [array_values($updated_bookmarks)];  //again converting to previous format to update in metadata to give list properly in list api
+						update_user_meta($user_id, 'ams_bookmarks', $nested_bookmarks);
+					}
+				}else{
+					return rest_ensure_response($ams_bookmark_formatted);
+				}
 				
-				return rest_ensure_response( get_user_meta($user_id, 'ams_bookmarks', true));
+				/*******************************************************************/
+				$bookmarksArray = get_user_meta($user_id, 'ams_bookmarks', true); 
+				if (is_array($bookmarksArray) && !empty($bookmarksArray)) {
+					$updated_bookmarks = [];
+					foreach($bookmarksArray[0] as $keys => $values){
+						$innerArray[] = $values;
+					}
+					$bookmarks = array_values($innerArray);
+				}else {
+					$bookmarks = [];
+				}
+				/*******************************************************************/
+				
+				return rest_ensure_response($bookmarks);
 			} else {
 				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
 			}
@@ -1754,7 +1915,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		
 		public function ams_ls_user_bookmarks_clear( WP_REST_Request $request ) {  
 
-			$user_id = sanitize_text_field($request->get_param('user_id'));
+			$user_id = $request->get_param('user_id');
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
@@ -1910,4 +2071,3 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 	}
 
 }
-

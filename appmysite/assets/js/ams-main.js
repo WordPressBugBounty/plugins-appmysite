@@ -12,7 +12,7 @@ jQuery("#ams_check_button").on("click",function(e) {
 	var ams_is_site_woocommerce = jQuery("input[name=ams_is_site_woocommerce]").val();
     jQuery.ajax({
         type: "POST",
-        url: "https://wordpress.api.appmysite.com/api/debug-website-connectivity",	//https://wordpress.api.appmysite.com/api/debug-website-connectivity
+		url: "https://wordpress.api.appmysite.com/api/debug-website-connectivity",
 		headers: {
 			'Content-Type':'application/json',
 			'Accept':'application/json'
@@ -72,6 +72,7 @@ jQuery("#ams_check_button").on("click",function(e) {
 jQuery('#ams-app-secret-token-form-submit-button').on("click",function (e) {
 	e.preventDefault();
 	let validLicense = true;
+	var site_url = jQuery("#ams_site_url").val();
 	jQuery('#ams_license_key').css('border-color', '');
 	jQuery('#ams_license_validation_error').html("");
 	var ams_license_key = jQuery("input[name=ams_license_key]").val();
@@ -82,58 +83,83 @@ jQuery('#ams-app-secret-token-form-submit-button').on("click",function (e) {
 
 	//Save license if Valid
 	if ( validLicense  ) {
-			jQuery.ajax( {
-				url: ajaxurl,
-				type: 'POST',
-				data: {
-					action: 'ams_license_key_form_submit',
-					'form-data': {'ams_license_key':ams_license_key},
-					nonce: frontend_ajax_object.amsFormNonce,
-				},
-				beforeSend: function() {
-					jQuery('#ams_verify_license_status').html("Verifying..");
-					jQuery('#ams-license-submit-text').html("");
-					jQuery('#ams-license-submit-loader').addClass("ams-license-submit-loader");
-					
-					
-				},
-			} ).done( function( responseFromSubmit ) {
+		console.log("Sending request with data:", {
+            website_url: site_url,
+            ams_license_key: ams_license_key
+        });
+		jQuery.ajax( {
+			//url: ajaxurl,
+			url: "https://wordpress.api.appmysite.com/api/verify-license",
+			type: 'POST',
+			headers: {
+				'Content-Type':'application/json',
+				'Accept':'application/json'
+			},
+			data: JSON.stringify({ 
+				website_url:site_url,//'https://shop.appmysite.com'
+				ams_license_key:ams_license_key
+			}),
+			beforeSend: function() {
+				jQuery('#ams_verify_license_status').html("Verifying..");
+				jQuery('#ams-license-submit-text').html("");
+				jQuery('#ams-license-submit-loader').addClass("ams-license-submit-loader");
+			},
+			success: function(responseFromSubmit) {
+				
+				if(responseFromSubmit.is_valid=="yes"){
+					jQuery('#ams_verify_license_status').html("Verified");
+					jQuery('#ams_verify_license_status').removeClass("license-status-red");
+					jQuery('#ams_verify_license_status').addClass("license-status-green");
+					jQuery('#ams_license_validation_error').html(responseFromSubmit.msg);
+					jQuery('#ams_license_validation_error').removeClass("license-status-red");
+					jQuery('#ams_license_validation_error').addClass("license-status-green");
 
-					if(responseFromSubmit.success){
+					// Send license key to WordPress to save in wp-config
+					jQuery.ajax({
+                        url: ajaxurl, // WordPress AJAX URL
+                        type: 'POST',
+                        data: {
+                            action: 'save_ams_license_key',
+                            ams_license_key: ams_license_key
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                console.log("License key saved successfully.");
+                            } else {
+                                console.log("Failed to save the license key.");
+                            }
+                        },
+                        error: function () {
+                            console.log("Error while saving the license key.");
+                        }
+                    });
 
-						if(responseFromSubmit.data.is_valid=="yes"){
-							jQuery('#ams_verify_license_status').html("Verified");
-							jQuery('#ams_verify_license_status').removeClass("license-status-red");
-							jQuery('#ams_verify_license_status').addClass("license-status-green");
-							jQuery('#ams_license_validation_error').html(responseFromSubmit.data.msg);
-							jQuery('#ams_license_validation_error').removeClass("license-status-red");
-							jQuery('#ams_license_validation_error').addClass("license-status-green");
-							jQuery('#input_ams_license_key').val(ams_license_key);
-							jQuery('#input_ams_license_status').val("Verified");
-							
-							jQuery('#ams-license-submit-text').html("Submit");
-							jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
-						}
-						else{	//if not valid
-							jQuery('#ams_verify_license_status').html("Unverified");
-							jQuery('#ams_verify_license_status').removeClass("license-status-green");
-							jQuery('#ams_verify_license_status').addClass("license-status-red");
-							jQuery('#ams_license_key').css('border-color', '#FF8E8E'); 
-							jQuery('#ams_license_validation_error').html(responseFromSubmit.data.msg);	
-								
-							jQuery('#ams-license-submit-text').html("Submit");
-							jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
-						}
-					}else{
-						jQuery('#ams_license_validation_error').html("Something went wrong.");
-						jQuery('#ams_verify_license_status').removeClass("license-status-green");
-						jQuery('#ams_verify_license_status').addClass("license-status-red");
-						jQuery('#ams_license_key').css('border-color', '#FF8E8E'); 
-						jQuery('#ams-license-submit-text').html("Submit");
-						jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
-					}					
-				    				
-			} );
+					jQuery('#input_ams_license_key').val(ams_license_key);
+					jQuery('#input_ams_license_status').val("Verified");
+					
+					jQuery('#ams-license-submit-text').html("Submit");
+					jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
+				}
+				else{	//if not valid
+					jQuery('#ams_verify_license_status').html("Unverified");
+					jQuery('#ams_verify_license_status').removeClass("license-status-green");
+					jQuery('#ams_verify_license_status').addClass("license-status-red");
+					jQuery('#ams_license_key').css('border-color', '#FF8E8E'); 
+					jQuery('#ams_license_validation_error').html(responseFromSubmit.msg);	
+						
+					jQuery('#ams-license-submit-text').html("Submit");
+					jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
+				}
+			},
+			error: function(xhr, status, error) {
+				jQuery('#ams_license_validation_error').html("Something went wrong.");
+				jQuery('#ams_verify_license_status').removeClass("license-status-green");
+				jQuery('#ams_verify_license_status').addClass("license-status-red");
+				jQuery('#ams_license_key').css('border-color', '#FF8E8E'); 
+				jQuery('#ams-license-submit-text').html("Submit");
+				jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
+			}
+		});	
 	}
 });
 
