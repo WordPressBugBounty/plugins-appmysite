@@ -6,7 +6,7 @@ Tested up to: 6.7.2
 Requires PHP: 7.4
 WC tested up to: 9.7.1
 WC requires at least: 7.5
-Stable tag: 3.13.1
+Stable tag: 3.13.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -316,7 +316,13 @@ Thank you [WordPress](http://wordpress.org/) and [WooCommerce](https://woocommer
 = 3.13.1 (26th March, 2025) =
 * General bug fixes
 
+= 3.13.2 (09th April, 2025) =
+* General bug fixes for wishlist and bookmark
+
 == Upgrade Notice ==
+
+= 3.13.0 =
+An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.
 
 = 3.12.0 =
 An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.

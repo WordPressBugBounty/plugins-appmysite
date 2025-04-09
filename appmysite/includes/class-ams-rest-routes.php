@@ -46,6 +46,12 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			add_action(
 				'rest_api_init',
 				function () {
+
+					// Registered custom user meta i.e. 'bookmark' here
+					$this->register_custom_user_meta();
+
+					// Add filter to modify the REST API response to include custom user meta
+					add_filter('rest_prepare_user', array($this, 'add_custom_user_meta_to_rest'), 10, 3);
 					
 					register_rest_route(
 						'wc/v3',
@@ -428,7 +434,30 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				}
 			);
 		}
+		
+		public function register_custom_user_meta() {
+			// Register custom user meta key to be included in REST API
+			register_meta('user', 'ams_bookmarks', [
+				'type'         => 'array',
+				'description'  => 'This is bookmared post ids of user',
+				'single'       => false,
+				'show_in_rest' => true, // Ensures it is available in the REST API
+			]);
+		}
+
+				// Modify REST API response to include custom user meta
+		public function add_custom_user_meta_to_rest($response, $user, $request) {
+			// Get the custom meta value for the user
+			$custom_meta = get_user_meta($user->ID, 'ams_bookmarks', true);
 			
+			// If meta exists, add it to the response
+			if (!empty($custom_meta)) {
+				$response->data['meta']['ams_bookmarks'] = $custom_meta;
+			}
+
+			return $response;
+		}
+
 		public	function ams_get_version_info( WP_REST_Request $request ){
 				
 				if ( ! function_exists( 'plugins_api' ) ) {
@@ -1525,187 +1554,158 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		}
 		
 		public function ams_ls_user_wishlist( WP_REST_Request $request ) {  
+			$param = $request->get_params();					
 			
-			$param        = $request->get_params();					
-			// The number of records to display per page
-			if ( ! empty( $param['per_page'] ) ) {
-				$per_page = $param['per_page'];
-			}else{$per_page = 10;}
-			// Pagination, starts from 1.
-			if ( ! empty( $param['page'] ) ) {
-				$page = $param['page'];
-			}
+			$per_page = !empty($param['per_page']) ? intval($param['per_page']) : 10;
+			$page = !empty($param['page']) ? intval($param['page']) : 1;
 			
 			$user_id = $request->get_param('user_id');
 			
-			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
-			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
-				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
-				return $error;
-			} elseif ( isset( $user->data ) ) {
-				//implement wishlist 				
-				$ams_wishlist = get_user_meta($user_id, 'ams_wishlist', true);
-				
-				if(gettype($ams_wishlist)!="array" || empty($ams_wishlist)){
-					return rest_ensure_response( [] );
-				}
-				
-				###########Pagination Logic####################################	
-				$ams_wishlist = array_reverse($ams_wishlist);  // reverse for latest first
-				$total_records = count($ams_wishlist);
-				$total_pages   = ceil($total_records / $per_page); 
-				if ($page > $total_pages) { 
-					return rest_ensure_response( [] );
-					//$page = $total_pages;
-				}
-				if ($page < 1) {
-					$page = 1;
-				}
-				$offset = ($page - 1) * $per_page;
-				$ams_wishlist = array_slice($ams_wishlist, $offset, $per_page);							
-				###########End Pagination######################################
-				
-				// Ensure that all items in $ams_bookmarks are arrays, and filter out any non-arrays
-				$ams_wishlist = array_filter($ams_wishlist, 'is_array');
-				if (empty($ams_wishlist)) {
-					return rest_ensure_response([]);
-				}
-				
-				// Merge arrays
-				$ams_wishlist_int = array_map('intval', array_merge(...$ams_wishlist));
-				//echo '<br>here'; print_r($ams_wishlist_int); die;
-				###########Retrieve The Products###############################
-				$request    = new WP_REST_Request( 'GET', '/wc/v3/products' );
-				$parameters = array( 'include' => $ams_wishlist_int );				
-					
-				if ( ! empty( $per_page ) ) {
-					$parameters += array( 'per_page' => 99 );
-				} 
-				$request->set_query_params( $parameters ); 
-				$response = rest_do_request( $request );
-				$server   = rest_get_server();
-				$data     = $server->response_to_data( $response, false );
-				return rest_ensure_response( $data );
-
-				###########End Retrieve The Products###############################
-				
-			} else {
-				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
+			$user = get_user_by('ID', $user_id);
+			if (!$user) {
+				return new WP_Error('ams_error', 'User not found.', ['status' => 500]);
 			}
+			
+			$ams_wishlist = get_user_meta($user_id, 'ams_wishlist', true);
+		
+			if (!is_array($ams_wishlist) || empty($ams_wishlist)) {
+				return rest_ensure_response([]);
+			}
+		
+			$total_records = count($ams_wishlist);
+			$total_pages = ceil($total_records / $per_page);
+			
+			if ($page > $total_pages || $page < 1) {
+				return rest_ensure_response([]);
+			}
+		
+			// Paginate
+			$offset = ($page - 1) * $per_page;
+			$ams_wishlist = array_slice($ams_wishlist, $offset, $per_page);
+		
+			// Ensure all values are integers
+			$ams_wishlist_int = array_map('intval', $ams_wishlist);
+		
+			if (empty($ams_wishlist_int)) {
+				return rest_ensure_response([]);
+			}
+		
+			// Fetch WooCommerce Products
+			$request    = new WP_REST_Request( 'GET', '/wc/v3/products' );
+			$parameters = array( 'include' => $ams_wishlist_int );							
+			if ( ! empty( $per_page ) ) {
+				$parameters += array( 'per_page' => 99 );
+			}
+			$request->set_query_params( $parameters );
+			$response = rest_do_request( $request );
+			$server   = rest_get_server();
+			$data     = $server->response_to_data( $response, false );
+
+			// Manually reorder the products based on the original wishlist order
+			$ordered_data = [];
+			foreach ($ams_wishlist_int as $product_id) {
+				foreach ($data as $product) {
+					if ($product['id'] === $product_id) {
+						$ordered_data[] = $product;
+						break;
+					}
+				}
+			}
+			return rest_ensure_response($ordered_data);
 		}
 		
-		public function ams_ls_user_wishlist_add( WP_REST_Request $request ) {    //done
-			
+		public function ams_ls_user_wishlist_add( WP_REST_Request $request ) {
 			$user_id = $request->get_param('user_id');
-			$product_id = $request->get_param('product_ids');
+			$product_ids = $request->get_param('product_ids');  // This will be an array of product IDs
 			
-			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
-			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
-				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+			$user = get_user_by('ID', $user_id);
+			
+			if (isset($user->errors)) {
+				$error_message = strip_tags($this->ams_convert_error_to_string($user->errors));
+				$error = new WP_Error();
+				$error->add('message', __($error_message . ''));
 				return $error;
-			} elseif ( isset( $user->data ) ) {
-				//implement wishlist 
+			} elseif (isset($user->data)) {
+				// implement wishlist
+				$user_wishlist = get_user_meta($user_id, 'ams_wishlist', true);
 				
-				$user_wishlist = get_user_meta($user_id, 'ams_wishlist', true);		//this will return a array.
-														
-					if ( metadata_exists( 'user', $user_id, 'ams_wishlist' ) ) {  
-										
-						if(is_array($user_wishlist)){
-							$ams_wishlist_formatted = array_map('intval', array_merge(...$user_wishlist));
-							
-							if(!in_array($product_id,$user_wishlist)){ 
-								$merged_wishlist = array_unique(array_merge($ams_wishlist_formatted, $product_id));
-								$user_wishlist = [$merged_wishlist];
-							}else{
-								//do nothing ad product already exixts
-								return new WP_Error( 'ams_error', 'Resource already exixts.', array( 'status' => 409 ) );
-							}
-							
-						}else{
-							$user_wishlist=[$product_id]; //create a new array with given post
-						}
-						update_user_meta($user_id, 'ams_wishlist', $user_wishlist);
-						/*******************************************************************/
-						$wishlistArray = get_user_meta($user_id, 'ams_wishlist', true); 
-						if (is_array($wishlistArray) && !empty($wishlistArray)) {
-							foreach($wishlistArray[0] as $keys => $values){
-								$innerArray[] = $values;
-							}
-							$wishlist = array_values($innerArray);
-						}
-						/*******************************************************************/
-						
-					}else{ 
-						$user_wishlist = $product_id; //create a new array with given product
-						update_user_meta($user_id, 'ams_wishlist', $user_wishlist);
-						$wishlist = get_user_meta($user_id, 'ams_wishlist', true); 		
+				if (metadata_exists('user', $user_id, 'ams_wishlist')) {
+					
+					// Ensure user_wishlist is an array (if it's not, initialize it as an empty array)
+					if (!is_array($user_wishlist)) {
+						$user_wishlist = []; // Reset to empty array if the wishlist is not an array
 					}
-													
+		
+					// Ensure user_wishlist is a flat array of integers before merging
+					$user_wishlist = array_map('intval', $user_wishlist);
+		
+					// Merge the incoming product IDs into the existing wishlist and remove duplicates
+					$merged_wishlist = array_unique(array_merge($product_ids, $user_wishlist));
+		
+					// Update the user meta with the new wishlist
+					update_user_meta($user_id, 'ams_wishlist', $merged_wishlist);
+		
+					// Return the full wishlist (updated)
+					$wishlist = array_values($merged_wishlist); // Reindex the array
+				} else {
+					// If no wishlist exists, create a new array with the product IDs
+					$user_wishlist = $product_ids;
+					update_user_meta($user_id, 'ams_wishlist', $user_wishlist);
+					$wishlist = $product_ids;  // Return the product IDs array directly
+				}
+				
 				return rest_ensure_response($wishlist);
 			} else {
-				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
+				return new WP_Error('ams_error', 'User not found.', ['status' => 500]);
 			}
 		}
 		
-		public function ams_ls_user_wishlist_remove( WP_REST_Request $request ) {  
-
+		public function ams_ls_user_wishlist_remove( WP_REST_Request $request ) {
 			$user_id = $request->get_param('user_id');
-			$product_id = $request->get_param('product_ids');
-			
-			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
-			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
-				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+			$product_ids_to_remove = $request->get_param('product_ids'); // Array of product IDs to remove
+		
+			// Get user object
+			$user = get_user_by('ID', $user_id);
+			if (isset($user->errors)) {
+				$error_message = strip_tags($this->ams_convert_error_to_string($user->errors));
+				$error = new WP_Error();
+				$error->add('message', __($error_message . ''));
 				return $error;
-			} elseif ( isset( $user->data ) ) {
-				//implement wishlist 
-				$user_wishlist = get_user_meta($user_id, 'ams_wishlist', true);		//this will return a array.
-				
+			} elseif (isset($user->data)) {
+				// Retrieve current wishlist from user meta
+				$user_wishlist = get_user_meta($user_id, 'ams_wishlist', true);
+		
+				// If no wishlist exists, return an empty array
 				if (empty($user_wishlist)) {
-					return rest_ensure_response([]);  // Return empty if no wishlist items exist
+					return rest_ensure_response([]);
 				}
-
-				$ams_wishlist_formatted = array_map('intval', array_merge(...$user_wishlist)); //this conversion is needed to check the post ids in user_wishlist nested array
-				$found_ids = array_intersect($product_id, $ams_wishlist_formatted);
-				
-				if (!empty($found_ids)) {
-					// Remove found product IDs from wishlist
-					$updated_wishlist = array_diff($ams_wishlist_formatted, $found_ids);
-
-					if (empty($updated_wishlist)) {
-						update_user_meta($user_id, 'ams_wishlist', []);  
-                		return rest_ensure_response([]);
-					} else {
-						// Reformat wishlist back into the original nested format
-						$nested_wishlist = [array_values($updated_wishlist)];
-						// Update user meta with new wishlist
-						update_user_meta($user_id, 'ams_wishlist', $nested_wishlist);
-					}
-				}else{ 
-					return rest_ensure_response($ams_wishlist_formatted);
+		
+				// Step 1: Flatten the wishlist if it's a nested array
+				if (is_array($user_wishlist) && isset($user_wishlist[0]) && is_array($user_wishlist[0])) {
+					$flattened_wishlist = array_merge(...$user_wishlist); // Flatten the nested array into a flat one
+				} else {
+					$flattened_wishlist = $user_wishlist; // Already a flat array
 				}
-
-				/*******************************************************************/
-				$wishlistsArray = get_user_meta($user_id, 'ams_wishlist', true);
-				if (is_array($wishlistsArray) && !empty($wishlistsArray)) {
-					$updated_wishlist = [];
-					foreach($wishlistsArray[0] as $keys => $values){
-						$innerArray[] = $values;
-					}
-					$wishlists = array_values($innerArray);
-				}else {
-					$wishlists = [];
+		
+				// Step 2: Remove the product IDs from the wishlist
+				$updated_wishlist = array_diff($flattened_wishlist, $product_ids_to_remove);
+		
+				// Step 3: If wishlist is empty after removal, clear it
+				if (empty($updated_wishlist)) {
+					update_user_meta($user_id, 'ams_wishlist', []);
+					return rest_ensure_response([]);
 				}
-				/*******************************************************************/
-				return rest_ensure_response($wishlists);
-				
+		
+				// Step 4: Reindex the array to return a flat, indexed array
+				$updated_wishlist = array_values($updated_wishlist);
+		
+				// Step 5: Update the user meta with the new wishlist (no nesting)
+				update_user_meta($user_id, 'ams_wishlist', $updated_wishlist);
+		
+				// Step 6: Return the updated wishlist as a flat array
+				return rest_ensure_response($updated_wishlist);
 			} else {
-				return new WP_Error('ams_error', 'User not found.', array('status' => 500));
+				return new WP_Error('ams_error', 'User not found.', ['status' => 500]);
 			}
 		}
 		
@@ -1758,8 +1758,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 					return rest_ensure_response( [] );
 				}
 
-				###########Pagination Logic####################################
-				$ams_bookmarks = array_reverse($ams_bookmarks);  // reverse for latest first				
+				###########Pagination Logic####################################		
 				$total_records = count($ams_bookmarks);
 				$total_pages   = ceil($total_records / $per_page);
 				if ($page > $total_pages) {
@@ -1786,7 +1785,6 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				###########Retrieve The Products###############################
 				$request    = new WP_REST_Request( 'GET', '/wp/v2/posts' );
 				$parameters = array( 'include' => $ams_bookmark_int);
-
 				if ( ! empty( $per_page ) ) {
 					$parameters += array( 'per_page' => 99 );
 				}
@@ -1794,8 +1792,18 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$response = rest_do_request( $request );
 				$server   = rest_get_server();
 				$data     = $server->response_to_data( $response, false );
-				
-				return rest_ensure_response( $data );
+
+				// Manually reorder the products based on the original wishlist order
+				$ordered_data = [];
+				foreach ($ams_bookmark_int as $post_id) {
+					foreach ($data as $post) {
+						if ($post['id'] === $post_id) {
+							$ordered_data[] = $post;
+							break;
+						}
+					}
+				}
+				return rest_ensure_response($ordered_data);
 
 				###########End Retrieve The Products###############################
 				
@@ -1819,14 +1827,14 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				//implement bookmark 
 				
 				$ams_bookmarks = get_user_meta($user_id, 'ams_bookmarks', true);		//this will return a array.
-														
-				if ( metadata_exists( 'user', $user_id, 'ams_bookmarks' ) ) { 
-											
+									
+				if (!empty($ams_bookmarks)) {  
+					// Case 1: If the 'ams_bookmarks' metadata exists.			
 					if(is_array($ams_bookmarks)){
 						$ams_bookmark_formatted = array_map('intval', array_merge(...$ams_bookmarks));
 						
 						if(!in_array($post_ids,$ams_bookmark_formatted)){
-							$merged_bookmarks = array_unique(array_merge($ams_bookmark_formatted, $post_ids));
+							$merged_bookmarks = array_unique(array_merge($post_ids, $ams_bookmark_formatted));
 							$ams_bookmarks = [$merged_bookmarks];
 						}else{
 							//do nothing ad product already exixts
@@ -1837,20 +1845,24 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						$ams_bookmarks=[$post_ids]; //create a new array with given post
 					}
 					update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);
-					/*******************************************************************/
-					$bookmarksArray = get_user_meta($user_id, 'ams_bookmarks', true); 
-					if (is_array($bookmarksArray) && !empty($bookmarksArray)) {
-						foreach($bookmarksArray[0] as $keys => $values){
-							$innerArray[] = $values;
-						}
-						$bookmarks = array_values($innerArray);
-					}
-					/*******************************************************************/
 					
-				}else{
-					$ams_bookmarks = $post_ids; //create a new array with given post
+				}else{  
+					// Case 2: If 'ams_bookmarks' metadata doesn't exist for the user.
+					$ams_bookmarks = [$post_ids]; //create a new array with given post
 					update_user_meta($user_id, 'ams_bookmarks', $ams_bookmarks);
 					$bookmarks = get_user_meta($user_id, 'ams_bookmarks', true); 						
+				}
+
+				// Fetch the updated bookmarks
+				$bookmarks = get_user_meta($user_id, 'ams_bookmarks', true); 
+
+				// Format bookmarks if necessary
+				if (is_array($bookmarks) && !empty($bookmarks)) {
+					$formatted_bookmarks = [];
+					foreach ($bookmarks[0] as $keys => $values) {
+						$formatted_bookmarks[] = $values;
+					}
+					$bookmarks = array_values($formatted_bookmarks);
 				}
 
 				return rest_ensure_response($bookmarks);
@@ -1884,8 +1896,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				if(!empty($found_ids)){
 					$updated_bookmarks = array_diff($ams_bookmark_formatted, $found_ids);
 					if(empty($updated_bookmarks)){
-						update_user_meta($user_id, 'ams_bookmarks', []);
-                		return rest_ensure_response([]);  
+						update_user_meta($user_id, 'ams_bookmarks', []);  
+                		return rest_ensure_response([]);
 					}else{
 						$nested_bookmarks = [array_values($updated_bookmarks)];  //again converting to previous format to update in metadata to give list properly in list api
 						update_user_meta($user_id, 'ams_bookmarks', $nested_bookmarks);
