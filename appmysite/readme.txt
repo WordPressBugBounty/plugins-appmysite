@@ -1,12 +1,12 @@
 === AppMySite - Create an app with the Best Mobile App Builder ===
 Contributors: appmysite
 Tags: mobile app builder,app creator,create app
-Requires at least: 6.6
-Tested up to: 6.7.2
+Requires at least: 6.7
+Tested up to: 6.8.2
 Requires PHP: 7.4
-WC tested up to: 9.7.1
+WC tested up to: 10.0.2
 WC requires at least: 7.5
-Stable tag: 3.13.2
+Stable tag: 3.13.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -318,6 +318,9 @@ Thank you [WordPress](http://wordpress.org/) and [WooCommerce](https://woocommer
 
 = 3.13.2 (09th April, 2025) =
 * General bug fixes for wishlist and bookmark
+
+= 3.13.3 (17th July, 2025) =
+* Compatibility check with latest versions of WordPress & WooCommerce
 
 == Upgrade Notice ==
 
