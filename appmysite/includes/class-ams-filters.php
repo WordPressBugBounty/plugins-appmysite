@@ -239,9 +239,13 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 				
 				//get order payment title set by the user
 				$payment_method_id = $object->get_payment_method();
-				$payment_gateway = WC()->payment_gateways->payment_gateways()[$payment_method_id]; //$payment_method_id
-				if($payment_gateway){ $payment_gateway_title = $payment_gateway->get_title(); }
-				else{ $payment_gateway_title = ''; }
+				$payment_gateway_title = '';
+				if (!empty($payment_method_id)) {
+					$payment_gateways = WC()->payment_gateways->payment_gateways();
+					if (isset($payment_gateways[$payment_method_id])) {
+						$payment_gateway_title = $payment_gateways[$payment_method_id]->get_title();
+					}
+				}
 				$response->data['ams_payment_method_title'] =  $payment_gateway_title  ;
 				
 				// this section is to add extra field into order api

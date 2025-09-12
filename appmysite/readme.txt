@@ -1,12 +1,12 @@
-=== AppMySite - Create an app with the Best Mobile App Builder ===
+===Convert WordPress to app | AppMySite===
 Contributors: appmysite
 Tags: mobile app builder,app creator,create app
-Requires at least: 6.7
+Requires at least: 6.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-WC tested up to: 10.0.2
+WC tested up to: 10.1.2
 WC requires at least: 7.5
-Stable tag: 3.13.3
+Stable tag: 3.14.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,7 +89,7 @@ Preview your app on both Android and iOS emulators. Get multiple device options 
 Test your mobile app on a real smartphone with the AppMySite demo app. Evaluate your app performance and design in a real mobile environment.
 
 * **Cart and Checkout Integration**
-Get an efficient cart & seamless checkout for your WooCommerce app. Ensure the best shopping experience for your customers.
+Get an efficient cart & seamless checkout for your WooCommerce app. Ensure the seamless shopping experience for your customers.
 
 * **Smart filter & sort options**
 Use smart filters, search, and sort options for enhanced discovery within your WordPress and WooCommerce apps.
@@ -319,10 +319,14 @@ Thank you [WordPress](http://wordpress.org/) and [WooCommerce](https://woocommer
 = 3.13.2 (09th April, 2025) =
 * General bug fixes for wishlist and bookmark
 
-= 3.13.3 (17th July, 2025) =
-* Compatibility check with latest versions of WordPress & WooCommerce
+= 3.14.0 (12th September, 2025) =
+* General bug fixes
+
 
 == Upgrade Notice ==
+
+= 3.14.0 =
+An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.
 
 = 3.13.0 =
 An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.
