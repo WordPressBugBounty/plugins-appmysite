@@ -59,7 +59,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_active_plugins'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -69,7 +69,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_version_info'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);	
 					
@@ -79,7 +79,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_menu_items'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -89,7 +89,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_menu_names'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -99,7 +99,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_login'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -109,7 +109,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_verify_user'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -119,7 +119,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_ls_get_profile_meta'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -129,7 +129,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_get_order_payment_url'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -163,7 +163,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_send_password_reset_link'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -173,7 +173,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_applicable_shipping_method'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -183,7 +183,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_ls_product_search'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -193,7 +193,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_ls_product_attributes'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -203,7 +203,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_verify_cart_items'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -213,7 +213,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_categories'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -223,7 +223,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_post_categories'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -233,7 +233,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_checkout_fields'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -243,7 +243,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_wc_points_rewards_effective_discount'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 							'args'     => array(
 								'line_items'  => array(
 									'required'    => true,
@@ -270,7 +270,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_wc_points_rewards_settings'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						)
 					);
 					
@@ -280,7 +280,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_change_password'),
-							'permission_callback' => '__return_true',
+							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 							'args' => array(
 									
 									'customer_id' => array(
@@ -308,23 +308,23 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 					);
 					
 					register_rest_route('wc/v3', '/ams-user-wishlist', array(
-					'methods' => 'GET',
-					'callback' => array($this,'ams_ls_user_wishlist'),
-					'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
-						// 'args' => array(
-						// 		'user_id' => array(
-						// 			'required' => true,
-						// 			'type' => 'integer',
-						// 			'description' => 'User ID',
-						// 		)
-						// 	) ,
+						'methods' => 'GET',
+						'callback' => array($this,'ams_ls_user_wishlist'),
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+						'args' => array(
+							'user_id' => array(
+								'required' => true,
+								'type' => 'integer',
+								'description' => 'User ID',
+							)
+						),
 					));
 					
 					register_rest_route('wc/v3', '/ams-user-wishlist/add', array(
-					'methods' => 'POST',
-					'callback' => array($this,'ams_ls_user_wishlist_add'),
-					'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
-					'args' => array(
+						'methods' => 'POST',
+						'callback' => array($this,'ams_ls_user_wishlist_add'),
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+						'args' => array(
 							'user_id' => array(
 								'required' => true,
 								'type' => 'integer',
@@ -335,14 +335,14 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 								'type'     => 'array',
 								'description' => 'Product ID',
 							)
-						) ,
+						),
 					));
 					
 					register_rest_route('wc/v3', '/ams-user-wishlist/remove', array(
-					'methods' => 'POST',
-					'callback' => array($this,'ams_ls_user_wishlist_remove'),
-					'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
-					'args' => array(
+						'methods' => 'POST',
+						'callback' => array($this,'ams_ls_user_wishlist_remove'),
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+						'args' => array(
 							'user_id' => array(
 								'required' => true,
 								'type' => 'integer',
@@ -353,83 +353,83 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 								'type'     => 'array',
 								'description' => 'Product ID',
 							)
-						) ,
+						),
 					));
 					
 					register_rest_route('wc/v3', '/ams-user-wishlist/clear', array(
-					'methods' => 'POST',
-					'callback' => array($this,'ams_ls_user_wishlist_clear'),
-					'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
-					'args' => array(
+						'methods' => 'POST',
+						'callback' => array($this,'ams_ls_user_wishlist_clear'),
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+						'args' => array(
 							'user_id' => array(
 								'required' => true,
 								'type' => 'integer',
 								'description' => 'User ID',
 							)
-						) ,
+						),
 					));
 
 					register_rest_route('wc/v3', '/ams-user-bookmarks', array(
 						'methods' => 'GET',
 						'callback' => array($this,'ams_ls_user_bookmarks'),
-						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
-						// 'args' => array(
-						// 	'user_id' => array(
-						// 		'required' => true,
-						// 		'type' => 'integer',
-						// 		'description' => 'User ID',
-						// 	)
-						// ) ,
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+						'args' => array(
+							'user_id' => array(
+								'required' => true,
+								'type' => 'integer',
+								'description' => 'User ID',
+							)
+						),
 					));
 						
 					register_rest_route('wc/v3', '/ams-user-bookmarks/add', array(
 						'methods' => 'POST',
 						'callback' => array($this,'ams_ls_user_bookmarks_add'),
-						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						'args' => array(
-								'user_id' => array(
-									'required' => true,
-									'type' => 'integer',
-									'description' => 'User ID',
-								),
-								'post_ids' => array(
-									'required' => true,
-									'type'     => 'array',
-									'description' => 'Post ID',
-								)
-							) ,
-						));
+							'user_id' => array(
+								'required' => true,
+								'type' => 'integer',
+								'description' => 'User ID',
+							),
+							'post_ids' => array(
+								'required' => true,
+								'type'     => 'array',
+								'description' => 'Post ID',
+							)
+						),
+					));
 						
 					register_rest_route('wc/v3', '/ams-user-bookmarks/remove', array(
 						'methods' => 'POST',
 						'callback' => array($this,'ams_ls_user_bookmarks_remove'),
-						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						'args' => array(
-								'user_id' => array(
-									'required' => true,
-									'type' => 'integer',
-									'description' => 'User ID',
-								),
-								'post_ids' => array(
-									'required' => true,
-									'type'     => 'array',
-									'description' => 'Post ID',
-								)
-							) ,
-						));
+							'user_id' => array(
+								'required' => true,
+								'type' => 'integer',
+								'description' => 'User ID',
+							),
+							'post_ids' => array(
+								'required' => true,
+								'type'     => 'array',
+								'description' => 'Post ID',
+							)
+						),
+					));
 						
 					register_rest_route('wc/v3', '/ams-user-bookmarks/clear', array(
 						'methods' => 'POST',
 						'callback' => array($this,'ams_ls_user_bookmarks_clear'),
-						'permission_callback' => '__return_true',	//function() {return current_user_can('manage_options');},
+						'permission_callback' => array($this, 'ams_authorize_user_data_access'),
 						'args' => array(
-								'user_id' => array(
-									'required' => true,
-									'type' => 'integer',
-									'description' => 'User ID',
-								)
-							) ,
-						));
+							'user_id' => array(
+								'required' => true,
+								'type' => 'integer',
+								'description' => 'User ID',
+							)
+						),
+					));
 					
 				}
 			);
@@ -1058,15 +1058,23 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$user->data->first_name = get_user_meta( $user->ID, 'first_name', true );
 				$user->data->last_name = get_user_meta( $user->ID, 'last_name', true );			
 				$user->data->roles = $user->roles;
+				
 				####get user wp_generate_auth_cookie####
-					$expiration = time() + apply_filters('auth_cookie_expiration', 14 * DAY_IN_SECONDS , $user->ID, true);
-					$site_url = get_site_url();//get_site_option('site_url');
-					if($site_url){$cookie_hash=md5($site_url);}else{$cookie_hash='';}
-					$user->data->expiration = $expiration;
-					//$user->data->expire = $expiration + ( 12 * HOUR_IN_SECONDS );
-					$user->data->cookie_hash = $cookie_hash;
-					$user->data->wordpress_logged_in_ = wp_generate_auth_cookie($user->ID, $expiration, 'logged_in');
-					$user->data->wordpress_ = wp_generate_auth_cookie($user->ID, $expiration, 'secure_auth');
+				$expiration = time() + apply_filters('auth_cookie_expiration', 14 * DAY_IN_SECONDS , $user->ID, true);
+
+				// FIXED COOKIE HASH LOGIC
+				if ( defined('COOKIEHASH') && COOKIEHASH ) {
+				    $cookie_hash = COOKIEHASH;
+				} else {
+				    $site_url = get_site_url();
+				    $cookie_hash = md5( rtrim($site_url, '/') );
+				}
+
+				$user->data->expiration = $expiration;
+				$user->data->cookie_hash = $cookie_hash;
+
+				$user->data->wordpress_logged_in_ = wp_generate_auth_cookie($user->ID, $expiration, 'logged_in');
+				$user->data->wordpress_ = wp_generate_auth_cookie($user->ID, $expiration, 'secure_auth');
 					
 				########################################
 				return rest_ensure_response( $user->data );
@@ -2019,6 +2027,34 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			 $string = str_replace( 'Error:', '', $string );
 			 $string = str_replace( '[message]', '', $string );
 			 return( $string );
+		}
+
+		/**
+		 * Centralized authorization function for user data endpoints
+		 * 
+		 * @param WP_REST_Request $request The REST request object
+		 * @return bool True if authorized, false otherwise
+		 */
+		public function ams_authorize_user_data_access( $request ) {
+			// Check CSRF protection
+			// if (!wp_verify_nonce($request->get_header('X-WP-Nonce'), 'wp_rest')) {
+			// 	return false;
+			// }
+			
+			// Check if user is logged in
+			if (!is_user_logged_in()) {
+				return false;
+			}
+			
+			$user_id = $request->get_param('user_id');
+			
+			// If no user_id provided, it will fail in validation check
+			if (empty($user_id)) {
+				return true;
+			}
+			
+			// If user_id provided, check if user can access that data
+			return current_user_can('manage_options') || get_current_user_id() == $user_id;
 		}
 
 		private function ams_basic_validate( $request, $keys ) {
