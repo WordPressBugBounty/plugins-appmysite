@@ -59,7 +59,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_active_plugins'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_admin_only'),
 						)
 					);
 					
@@ -69,7 +69,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_version_info'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_admin_only'),
 						)
 					);	
 					
@@ -79,7 +79,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_menu_items'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -89,7 +89,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_get_menu_names'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -99,7 +99,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_login'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -109,7 +109,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_verify_user'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -120,6 +120,13 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_ls_get_profile_meta'),
 							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'args' => array(
+								'id' => array(
+									'required' => true,
+									'type' => 'integer',
+									'description' => 'User ID',
+								)
+							),
 						)
 					);
 					
@@ -129,24 +136,20 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_get_order_payment_url'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
 					register_rest_route('wc/v3', '/ams-verify-application-password', array(
 					'methods' => 'GET',
 					'callback' => array($this,'ams_ls_verify_application_password'),
-					'permission_callback' => function() {
-							return current_user_can('manage_options');
-						},
+					'permission_callback' => array($this, 'ams_authorize_admin_only'),
 					));
 					
 					register_rest_route('wc/v3', '/ams-wp-get-user-auth-cookies', array(
 					'methods' => 'POST',
 					'callback' => array($this,'ams_ls_wp_get_user_auth_cookies'),
-					'permission_callback' => function() {
-						return current_user_can('manage_options');
-					},
+					'permission_callback' => array($this, 'ams_authorize_admin_only'),
 					'args' => array(
 							'user_id' => array(
 								'required' => true,
@@ -163,7 +166,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_send_password_reset_link'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -174,6 +177,13 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_applicable_shipping_method'),
 							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'args' => array(
+								'customer_id' => array(
+									'required' => true,
+									'type' => 'integer',
+									'description' => 'Customer ID',
+								),
+							),
 						)
 					);
 					
@@ -183,7 +193,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_ls_product_search'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -193,7 +203,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_ls_product_attributes'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -203,7 +213,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_verify_cart_items'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -213,7 +223,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_categories'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -223,7 +233,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_post_categories'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -233,7 +243,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_checkout_fields'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -270,7 +280,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_wc_points_rewards_settings'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 						)
 					);
 					
@@ -1007,13 +1017,11 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 
 		public function ams_ls_get_profile_meta( WP_REST_Request $request ) {
 
-			if ( isset( $request['id'] ) ) {
-				$user_id = sanitize_text_field( $request['id'] );
-			}
-			$validate = $this->ams_basic_validate( $req, array( 'id' ) );
+			$validate = $this->ams_basic_validate( $request, array( 'id' ) );
 			if ( $validate != true ) {
 				return $validate;
 			}
+			$user_id = sanitize_text_field( $request['id'] );
 			$user_meta_data          = get_user_meta( $user_id, 'wp_user_avatar', true );
 			$profile_image_full_path = wp_get_attachment_image_src( $user_meta_data );
 			return rest_ensure_response( array( 'wp_user_avatar' => $profile_image_full_path ) );
@@ -1038,6 +1046,18 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$error->add( 'message', __( 'The order ID appears to be invalid. Please try again.' ) );
 				return $error;
 			}  // Verify Valid Order ID
+			
+			// Check order ownership - user must be admin or order owner
+			$order_customer_id = $order->get_customer_id();
+			$current_user_id = get_current_user_id();
+			if (!current_user_can('manage_options') && $order_customer_id != $current_user_id) {
+				return new WP_Error(
+					'rest_forbidden',
+					__('You do not have permission to access this order.'),
+					array('status' => 403)
+				);
+			}
+			
 			$pay_now_url = esc_url( $order->get_checkout_payment_url() );
 			return( rest_ensure_response( html_entity_decode( $pay_now_url ) ) );
 		}
@@ -1374,7 +1394,14 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 					//$discount_applied = $max_discount;
 				}
 				$discount_applied = filter_var( $discount_applied, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
-				return rest_ensure_response( array( array( 'effective_discount_value' => (float) $discount_applied ) ) );
+				
+				// Calculate actual points being redeemed based on the effective discount
+				$points_redeemed = WC_Points_Rewards_Manager::calculate_points_for_discount( $discount_applied );
+				
+				return rest_ensure_response( array( array( 
+					'effective_discount_value' => (float) $discount_applied,
+					'points_redeemed' => (int) $points_redeemed
+				) ) );
 
 			} else {
 				return rest_ensure_response( array() );
@@ -2030,31 +2057,77 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		}
 
 		/**
-		 * Centralized authorization function for user data endpoints
+		 * Permission callback for admin-only endpoints
+		 * Requires user to have 'manage_options' capability (administrator)
 		 * 
 		 * @param WP_REST_Request $request The REST request object
 		 * @return bool True if authorized, false otherwise
 		 */
+		public function ams_authorize_admin_only( $request ) {
+			return is_user_logged_in() && current_user_can('manage_options');
+		}
+
+		/**
+		 * Permission callback for endpoints that require any authenticated user
+		 * No specific user data access - just needs to be logged in
+		 * 
+		 * @param WP_REST_Request $request The REST request object
+		 * @return bool True if authorized, false otherwise
+		 */
+		public function ams_authorize_authenticated( $request ) {
+			return is_user_logged_in();
+		}
+
+		/**
+		 * Permission callback for user-specific data endpoints
+		 * Requires user_id parameter and validates ownership or admin access
+		 * 
+		 * @param WP_REST_Request $request The REST request object
+		 * @return bool|WP_Error True if authorized, WP_Error otherwise
+		 */
 		public function ams_authorize_user_data_access( $request ) {
-			// Check CSRF protection
-			// if (!wp_verify_nonce($request->get_header('X-WP-Nonce'), 'wp_rest')) {
-			// 	return false;
-			// }
-			
 			// Check if user is logged in
 			if (!is_user_logged_in()) {
-				return false;
+				return new WP_Error(
+					'rest_not_logged_in',
+					__('You must be logged in to access this endpoint.'),
+					array('status' => 401)
+				);
 			}
 			
+			// Get user_id from request - check 'user_id', 'customer_id', and 'id' parameters
 			$user_id = $request->get_param('user_id');
-			
-			// If no user_id provided, it will fail in validation check
 			if (empty($user_id)) {
+				$user_id = $request->get_param('customer_id');
+			}
+			if (empty($user_id)) {
+				$user_id = $request->get_param('id');
+			}
+			
+			// user_id is required for user-specific endpoints
+			if (empty($user_id)) {
+				return new WP_Error(
+					'rest_missing_user_id',
+					__('user_id parameter is required for this endpoint.'),
+					array('status' => 400)
+				);
+			}
+			
+			// Admins can access any user's data
+			if (current_user_can('manage_options')) {
 				return true;
 			}
 			
-			// If user_id provided, check if user can access that data
-			return current_user_can('manage_options') || get_current_user_id() == $user_id;
+			// Regular users can only access their own data
+			if (get_current_user_id() === intval($user_id)) {
+				return true;
+			}
+			
+			return new WP_Error(
+				'rest_forbidden',
+				__('You do not have permission to access this user\'s data.'),
+				array('status' => 403)
+			);
 		}
 
 		private function ams_basic_validate( $request, $keys ) {
