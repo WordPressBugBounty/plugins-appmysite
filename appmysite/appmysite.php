@@ -3,7 +3,7 @@
  * Plugin Name: AppMySite
  * Plugin URI: https://www.appmysite.com
  * Description: This plugin enables WordPress & WooCommerce users to sync their websites with native iOS and Android apps, created on <a href="https://www.appmysite.com/"><strong>www.appmysite.com</strong></a>
- * Version: 3.15.1
+ * Version: 3.15.2
  * Author: AppMySite
  * Text Domain: appmysite
  * Author URI: https://www.appmysite.com

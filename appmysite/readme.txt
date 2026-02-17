@@ -6,7 +6,7 @@ Tested up to: 6.9
 Requires PHP: 7.4
 WC tested up to: 10.4.3
 WC requires at least: 7.4
-Stable tag: 3.15.1
+Stable tag: 3.15.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -312,8 +312,14 @@ Built with ❤️ for the WordPress and WooCommerce community.
 = 3.15.1 (05th February, 2026) =
 * General bug fixes
 
+= 3.15.2 (16th February, 2026) =
+* General bug fixes
+
 
 == Upgrade Notice ==
+
+= 3.15.2 =
+An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.
 
 = 3.15.1 =
 An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.

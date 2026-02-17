@@ -176,10 +176,10 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 						array(
 							'methods'  => 'POST',
 							'callback' => array($this,'ams_ls_applicable_shipping_method'),
-							'permission_callback' => array($this, 'ams_authorize_user_data_access'),
+							'permission_callback' => array($this, 'ams_authorize_authenticated'),
 							'args' => array(
 								'customer_id' => array(
-									'required' => true,
+									'required' => false,
 									'type' => 'integer',
 									'description' => 'Customer ID',
 								),
@@ -1153,9 +1153,20 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 
 			$shipping                = $req['shipping'];
 			$line_items              = $req['line_items'];
-			$customer_id = 0 ;
-			if(isset( $req[ 'customer_id' ] )){
-				$customer_id = sanitize_text_field( $req[ 'customer_id' ] );				
+			$customer_id = 0;
+			if ( isset( $req['customer_id'] ) && $req['customer_id'] !== '' ) {
+				$customer_id = absint( $req['customer_id'] );
+				// When a specific customer_id is provided (non-guest), enforce ownership
+				if ( $customer_id > 0 ) {
+					$current_user_id = get_current_user_id();
+					if ( $current_user_id !== $customer_id && ! current_user_can( 'manage_options' ) ) {
+						return new WP_Error(
+							'rest_forbidden',
+							__( 'You do not have permission to access this user\'s data.' ),
+							array( 'status' => 403 )
+						);
+					}
+				}
 			}
 			
 			$content = [];
@@ -2056,72 +2067,75 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			 return( $string );
 		}
 
-		/**
-		 * Permission callback for admin-only endpoints
-		 * Requires user to have 'manage_options' capability (administrator)
-		 * 
-		 * @param WP_REST_Request $request The REST request object
-		 * @return bool True if authorized, false otherwise
-		 */
-		public function ams_authorize_admin_only( $request ) {
-			return is_user_logged_in() && current_user_can('manage_options');
+	/**
+	 * Permission callback for admin-only endpoints
+	 * Requires user to have 'manage_options' capability (administrator).
+	 * Works with both WordPress session and WooCommerce REST API (consumer key/secret) auth.
+	 *
+	 * @param WP_REST_Request $request The REST request object
+	 * @return bool True if authorized, false otherwise
+	 */
+	public function ams_authorize_admin_only( $request ) {
+		$user_id = get_current_user_id();
+		return $user_id > 0 && current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Permission callback for endpoints that require any authenticated user.
+	 * Works with both WordPress session and WooCommerce REST API (consumer key/secret) auth.
+	 *
+	 * @param WP_REST_Request $request The REST request object
+	 * @return bool True if authorized, false otherwise
+	 */
+	public function ams_authorize_authenticated( $request ) {
+		return get_current_user_id() > 0;
+	}
+
+	/**
+	 * Permission callback for user-specific data endpoints.
+	 * Requires user_id parameter and validates ownership or admin access.
+	 * Works with both WordPress session and WooCommerce REST API auth.
+	 *
+	 * @param WP_REST_Request $request The REST request object
+	 * @return bool|WP_Error True if authorized, WP_Error otherwise
+	 */
+	public function ams_authorize_user_data_access( $request ) {
+		$current_user_id = get_current_user_id();
+		if ( $current_user_id === 0 ) {
+			return new WP_Error(
+				'rest_not_logged_in',
+				__( 'You must be logged in to access this endpoint.' ),
+				array( 'status' => 401 )
+			);
 		}
 
-		/**
-		 * Permission callback for endpoints that require any authenticated user
-		 * No specific user data access - just needs to be logged in
-		 * 
-		 * @param WP_REST_Request $request The REST request object
-		 * @return bool True if authorized, false otherwise
-		 */
-		public function ams_authorize_authenticated( $request ) {
-			return is_user_logged_in();
+		// Get user_id from request - check 'user_id', 'customer_id', and 'id' parameters
+		$user_id = $request->get_param( 'user_id' );
+		if ( empty( $user_id ) ) {
+			$user_id = $request->get_param( 'customer_id' );
+		}
+		if ( empty( $user_id ) ) {
+			$user_id = $request->get_param( 'id' );
 		}
 
-		/**
-		 * Permission callback for user-specific data endpoints
-		 * Requires user_id parameter and validates ownership or admin access
-		 * 
-		 * @param WP_REST_Request $request The REST request object
-		 * @return bool|WP_Error True if authorized, WP_Error otherwise
-		 */
-		public function ams_authorize_user_data_access( $request ) {
-			// Check if user is logged in
-			if (!is_user_logged_in()) {
-				return new WP_Error(
-					'rest_not_logged_in',
-					__('You must be logged in to access this endpoint.'),
-					array('status' => 401)
-				);
-			}
-			
-			// Get user_id from request - check 'user_id', 'customer_id', and 'id' parameters
-			$user_id = $request->get_param('user_id');
-			if (empty($user_id)) {
-				$user_id = $request->get_param('customer_id');
-			}
-			if (empty($user_id)) {
-				$user_id = $request->get_param('id');
-			}
-			
-			// user_id is required for user-specific endpoints
-			if (empty($user_id)) {
-				return new WP_Error(
-					'rest_missing_user_id',
-					__('user_id parameter is required for this endpoint.'),
-					array('status' => 400)
-				);
-			}
-			
-			// Admins can access any user's data
-			if (current_user_can('manage_options')) {
-				return true;
-			}
-			
-			// Regular users can only access their own data
-			if (get_current_user_id() === intval($user_id)) {
-				return true;
-			}
+		// user_id is required for user-specific endpoints
+		if ( empty( $user_id ) ) {
+			return new WP_Error(
+				'rest_missing_user_id',
+				__( 'user_id parameter is required for this endpoint.' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Admins can access any user's data
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
+		// Regular users can only access their own data
+		if ( $current_user_id === intval( $user_id ) ) {
+			return true;
+		}
 			
 			return new WP_Error(
 				'rest_forbidden',
