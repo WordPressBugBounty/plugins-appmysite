@@ -264,6 +264,15 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 			}
 
 		public function ams_ls_catalog_hidden_products_search_query_fix( $query = false ) {
+			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+			$rest_route  = isset( $_GET['rest_route'] ) ? sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) : '';
+			$route_path  = $rest_route ? $rest_route : $request_uri;
+
+			// Skip WooCommerce analytics routes to avoid side effects in wp-admin analytics search.
+			if ( strpos( $route_path, '/wc-analytics/' ) !== false ) {
+				return;
+			}
+
 			if ( ! is_admin() && isset( $query->query['post_type'] ) && $query->query['post_type'] === 'product' ) {
 				$tax_query = $query->get( 'tax_query' );		
 				if(!is_array($tax_query)){$tax_query=[];}
