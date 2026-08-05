@@ -1,12 +1,12 @@
 === AppMySite – WordPress & WooCommerce Mobile App Builder (No-Code Android & iOS App Maker) ===
 Contributors: appmysite
 Tags: wordpress mobile app builder, woocommerce mobile app builder, convert website to app, android app builder, iphone app builder
-Requires at least: 6.8
-Tested up to: 6.9
+Requires at least: 5.8
+Tested up to: 7.0
 Requires PHP: 7.4
-WC tested up to: 10.6.2
+WC tested up to: 10.7.0
 WC requires at least: 7.4
-Stable tag: 3.15.3
+Stable tag: 3.15.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -318,8 +318,14 @@ Built with ❤️ for the WordPress and WooCommerce community.
 = 3.15.3 (13th April, 2026) =
 * General bug fixes
 
+= 3.15.4 (21st May, 2026) =
+* General bug fixes
+
 
 == Upgrade Notice ==
+
+= 3.15.4 =
+An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.
 
 = 3.15.3 =
 An update is available for this plugin. To access all the latest features, head over to your <strong>www.appmysite.com(https://www.appmysite.com/)</strong> account and rebuild your app to the latest version.

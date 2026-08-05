@@ -35,48 +35,40 @@
 			return array();
 		}
 		
-		function ams_disable_theme($theme)
-		{
-			if(defined('WP_DEFAULT_THEME'))
-			{
-				return WP_DEFAULT_THEME;
+		function ams_disable_theme( $theme ) {
+			if ( defined( 'WP_DEFAULT_THEME' ) ) {
+				$default_theme = wp_get_theme( WP_DEFAULT_THEME );
+				if ( $default_theme->exists() ) {
+					return WP_DEFAULT_THEME;
+				}
 			}
-			else
-			{
-				// Check if twenty * is installed, and if so, activate it.
-				$themes = wp_get_themes();
-				
-				if(array_key_exists('twentytwentythree', $themes))
-					return 'twentytwentythree';
-				else if(array_key_exists('twentytwentytwo', $themes))
-					return 'twentytwentytwo';
-				else if(array_key_exists('twentytwentyone', $themes))
-					return 'twentytwentyone';
-				else if(array_key_exists('twentytwenty', $themes))
-					return 'twentytwenty';
-				else if(array_key_exists('twentynineteen', $themes))
-					return 'twentynineteen';
-				else if(array_key_exists('twentyeighteen', $themes))
-					return 'twentyeighteen';
-				else if(array_key_exists('twentyseventeen', $themes))
-					return 'twentyseventeen';
-				else if(array_key_exists('twentysixteen', $themes))
-					return 'twentysixteen';
-				else if(array_key_exists('twentyfifteen', $themes))
-					return 'twentyfifteen';
-				else if(array_key_exists('twentyfourteen', $themes))
-					return 'twentyfourteen';
-				else if(array_key_exists('twentythirteen', $themes))
-					return 'twentythirteen';
-				else if(array_key_exists('twentytwelve', $themes))
-					return 'twentytwelve';
-				else if(array_key_exists('twentyeleven', $themes))
-					return 'twentyeleven';
-				else if(array_key_exists('twentyten', $themes))
-					return 'twentyten';
+
+			$fallback_slugs = array(
+				'twentytwentyfive',
+				'twentytwentyfour',
+				'twentytwentythree',
+				'twentytwentytwo',
+				'twentytwentyone',
+				'twentytwenty',
+				'twentynineteen',
+				'twentyeighteen',
+				'twentyseventeen',
+				'twentysixteen',
+				'twentyfifteen',
+				'twentyfourteen',
+				'twentythirteen',
+				'twentytwelve',
+				'twentyeleven',
+				'twentyten',
+			);
+
+			$themes = wp_get_themes();
+			foreach ( $fallback_slugs as $slug ) {
+				if ( array_key_exists( $slug, $themes ) ) {
+					return $slug;
+				}
 			}
-			
-			// No default themes are installed, so we'll stick with the current active theme.
+
 			return $theme;
 		}
 		

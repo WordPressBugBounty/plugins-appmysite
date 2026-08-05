@@ -218,9 +218,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							?>
                             <button id="ams_check_button" value="<?php echo plugins_url();?>"><div id="ams-health-check-btn-loader"></div><span id="ams-health-check-btn-text">Check</span></button>
 							<input type="hidden" id="ams_site_url" name="ams_site_url" value="<?php echo esc_url(site_url());?>">
-							<input type="hidden" id="ams_is_site_woocommerce" name="ams_is_site_woocommerce" value="<?php echo $ams_is_site_woocommerce;?>">
-							<input type="hidden" name="ams_license_key" id="input_ams_license_key" value="<?php if(defined('AMS_LICENSE_KEY')) {echo(AMS_LICENSE_KEY);} ?>" />
-							<input type="hidden" name="ams_license_status" id="input_ams_license_status" value="<?php if(defined('AMS_LICENSE_STATUS')) {echo(AMS_LICENSE_STATUS);} ?>" />
+							<input type="hidden" id="ams_is_site_woocommerce" name="ams_is_site_woocommerce" value="<?php echo esc_attr( (string) $ams_is_site_woocommerce ); ?>">
+							<input type="hidden" name="ams_license_key" id="input_ams_license_key" value="<?php echo defined( 'AMS_LICENSE_KEY' ) ? esc_attr( AMS_LICENSE_KEY ) : ''; ?>" />
+							<input type="hidden" name="ams_license_status" id="input_ams_license_status" value="<?php echo defined( 'AMS_LICENSE_STATUS' ) ? esc_attr( AMS_LICENSE_STATUS ) : ''; ?>" />
                         </div>
                     </div>
                     

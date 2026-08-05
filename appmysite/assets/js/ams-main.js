@@ -120,7 +120,8 @@ jQuery('#ams-app-secret-token-form-submit-button').on("click",function (e) {
                         type: 'POST',
                         data: {
                             action: 'save_ams_license_key',
-                            ams_license_key: ams_license_key
+                            ams_license_key: ams_license_key,
+                            nonce: frontend_ajax_object.amsFormNonce
                         },
                         success: function (response) {
                             if (response.success) {

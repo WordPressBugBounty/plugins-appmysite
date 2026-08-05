@@ -50,7 +50,8 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 			__( 'AppMySite' ),
 			'manage_options',
 			'ams-home',
-			array( &$this, 'ams_admin_menu_page' ),plugins_url().'/appmysite/assets/images/ams-side-menu-icon.svg'
+			array( &$this, 'ams_admin_menu_page' ),
+			plugins_url( 'assets/images/ams-side-menu-icon.svg', AMS_PLUGIN_DIR )
 			);
 			
 		}
@@ -61,7 +62,25 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 		}
 
 		function save_ams_license_key() {
-			
+
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error(
+					array(
+						'is_valid' => 'no',
+						'msg'      => 'Unauthorized.',
+					)
+				);
+			}
+
+			if ( ! check_ajax_referer( 'ajax-nonce', 'nonce', false ) ) {
+				wp_send_json_error(
+					array(
+						'is_valid' => 'no',
+						'msg'      => 'Invalid security token.',
+					)
+				);
+			}
+
 			// Get the license key from the POST request
 			if (isset($_POST['ams_license_key'])) {
 				$ams_license_key = sanitize_text_field($_POST['ams_license_key']);
@@ -230,101 +249,80 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 			
 		}*/
 
-		function ams_safe_mode_form_submit() { 
+		function ams_safe_mode_form_submit() {
 
 			if ( ! check_ajax_referer( 'ajax-nonce', 'nonce', false ) ) {
 				wp_send_json_error();
 				wp_die();
-			}			
-			$form_data   =  wp_parse_args( $_POST['form-data'] ) ; // clean
-			
-			$ams_safe_mode = sanitize_text_field($form_data['ams_safe_mode']);
-			
-			/* Check if twenty * is installed */
-			$if_twenty_theme_is_installed = false;
+			}
 
-				// Check if twenty * is installed, and if so, activate it.
-				$themes = wp_get_themes();
-				
-				if(array_key_exists('twentytwentyfour', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentytwentythree', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentytwentytwo', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentytwentyone', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentytwenty', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentynineteen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentyeighteen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentyseventeen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentysixteen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentyfifteen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentyfourteen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentythirteen', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentytwelve', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentyeleven', $themes))
-					$if_twenty_theme_is_installed = true;
-				else if(array_key_exists('twentyten', $themes))
-					$if_twenty_theme_is_installed = true;
-			
-			if(!$if_twenty_theme_is_installed){
+			$form_data = array();
+			if ( isset( $_POST['form-data'] ) && is_array( $_POST['form-data'] ) ) {
+				$form_data = wp_parse_args( wp_unslash( $_POST['form-data'] ) );
+			}
+
+			if ( empty( $form_data['ams_safe_mode'] ) ) {
 				wp_send_json_error(
 					array(
-						'ams_safe_mode' => AMS_SAFE_MODE,
-						'msg'	=> "No default WordPress theme found on your website. Please install at least one default theme to enable safe mode."
+						'ams_safe_mode' => ams_get_safe_mode_value(),
+						'msg'           => 'Invalid safe mode request.',
+					)
+				);
+			}
+
+			$ams_safe_mode = sanitize_text_field( $form_data['ams_safe_mode'] );
+
+			if ( ! in_array( $ams_safe_mode, array( 'on', 'off' ), true ) ) {
+				wp_send_json_error(
+					array(
+						'ams_safe_mode' => ams_get_safe_mode_value(),
+						'msg'           => 'Invalid safe mode value.',
+					)
+				);
+			}
+
+			if ( ! function_exists( 'ams_has_default_theme' ) || ! ams_has_default_theme() ) {
+				wp_send_json_error(
+					array(
+						'ams_safe_mode' => ams_get_safe_mode_value(),
+						'msg'           => 'No default WordPress theme found on your website. Please install at least one default theme to enable safe mode.',
 					)
 				);
 				wp_die();
 			}
-			
+
 			/*  Logic to modify wp-config file  */
 			try {
 				$config_transformer = new WPConfigTransformer( $this->get_config_path() );
-				
-				$config_param = $this->get_config_args(array( 'normalize' => true ));
-				
-				// update constant
-					$config_transformer->update( 'constant', 'AMS_SAFE_MODE', $ams_safe_mode, $config_param ); //'raw' => true
-				
-				if($ams_safe_mode=='on'){
+
+				$config_param = $this->get_config_args( array( 'normalize' => true ) );
+
+				$config_transformer->update( 'constant', 'AMS_SAFE_MODE', $ams_safe_mode, $config_param );
+
+				if ( 'on' === $ams_safe_mode ) {
 					wp_send_json_success(
 						array(
 							'ams_safe_mode' => $ams_safe_mode,
-							'msg' =>'Safe mode has been activated successfully. We recommend not leaving it on for an extended period.'
+							'msg'           => 'Safe mode has been activated successfully. We recommend not leaving it on for an extended period.',
 						)
 					);
-					wp_die();
-					
-				}else{
+				} else {
 					wp_send_json_success(
 						array(
 							'ams_safe_mode' => $ams_safe_mode,
-							'msg' =>'Safe mode has been deactivated successfully.'
+							'msg'           => 'Safe mode has been deactivated successfully.',
 						)
 					);
-					wp_die();
 				}
-				
-			} catch ( \Exception $e ) {
+			} catch ( \Throwable $e ) {
 				$messsage = 'Unable to update AMS_SAFE_MODE in wp-config.  ' . $e->getMessage();
-				
+
 				wp_send_json_error(
 					array(
-						'ams_safe_mode' => AMS_SAFE_MODE,
-						'msg'	=> $messsage
+						'ams_safe_mode' => ams_get_safe_mode_value(),
+						'msg'           => $messsage,
 					)
 				);
-				wp_die();
 			}
 
 							
@@ -344,8 +342,13 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 		}
 
 		private function get_config_args($config_args){
-			if ( false === strpos( file_get_contents( $this->get_config_path() ), "/* That's all, stop editing!" ) ) {
-				if ( 1 === preg_match( '@\$table_prefix(.*;)@', file_get_contents( $this->get_config_path() ), $matches ) ) {
+			$config_contents = @file_get_contents( $this->get_config_path() );
+			if ( false === $config_contents ) {
+				return $config_args;
+			}
+
+			if ( false === strpos( $config_contents, "/* That's all, stop editing!" ) ) {
+				if ( 1 === preg_match( '@\$table_prefix(.*;)@', $config_contents, $matches ) ) {
 					$config_args = array_merge(
 						$config_args,
 						[

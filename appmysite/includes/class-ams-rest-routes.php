@@ -224,6 +224,26 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 							'methods'  => 'GET',
 							'callback' => array($this,'ams_categories'),
 							'permission_callback' => array($this, 'ams_authorize_authenticated'),
+							'args'     => array(
+								'sorting_order' => array(
+									'required'          => false,
+									'type'              => 'string',
+									'sanitize_callback' => 'sanitize_text_field',
+									'description'       => 'AMS sorting preset for categories.',
+								),
+								'orderby' => array(
+									'required'          => false,
+									'type'              => 'string',
+									'sanitize_callback' => 'sanitize_key',
+									'description'       => 'Field to order categories by.',
+								),
+								'order' => array(
+									'required'          => false,
+									'type'              => 'string',
+									'sanitize_callback' => 'sanitize_key',
+									'description'       => 'Sort direction (asc or desc).',
+								),
+							),
 						)
 					);
 					
@@ -447,12 +467,22 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		
 		public function register_custom_user_meta() {
 			// Register custom user meta key to be included in REST API
-			register_meta('user', 'ams_bookmarks', [
+			register_meta( 'user', 'ams_bookmarks', [
 				'type'         => 'array',
-				'description'  => 'This is bookmared post ids of user',
-				'single'       => false,
-				'show_in_rest' => true, // Ensures it is available in the REST API
-			]);
+				'description'  => 'Bookmarked post IDs for the user.',
+				'single'       => true,
+				'show_in_rest' => [
+					'schema' => [
+						'type'  => 'array',
+						'items' => [
+							'type'  => 'array',
+							'items' => [
+								'type' => 'integer',
+							],
+						],
+					],
+				],
+			] );
 		}
 
 				// Modify REST API response to include custom user meta
@@ -570,14 +600,13 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 
 		 * Get all product and post categories in a binary tree.
 		******/
-		public function ams_categories() {
+		public function ams_categories( WP_REST_Request $request ) {
 
-			$orderby    = 'name';
-			$order      = 'asc';
+			$sort_args  = $this->ams_resolve_category_sort_args( $request );
 			$hide_empty = true;
 			$cat_args   = array(
-				'orderby'    => $orderby,
-				'order'      => $order,
+				'orderby'    => $sort_args['orderby'],
+				'order'      => $sort_args['order'],
 				'hide_empty' => $hide_empty,
 			);
 
@@ -1542,44 +1571,12 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			return $array;
 		}
 
-		public function ams_disable_theme($theme)
-		{
-			
-				// Check if twenty * is installed, and if so, activate it.
-				$themes = wp_get_themes();
-				
-				if(array_key_exists('twentytwentyfour', $themes))
-					return 'twentytwentyfour';
-				else if(array_key_exists('twentytwentythree', $themes))
-					return 'twentytwentythree';
-				else if(array_key_exists('twentytwentytwo', $themes))
-					return 'twentytwentytwo';
-				else if(array_key_exists('twentytwentyone', $themes))
-					return 'twentytwentyone';
-				else if(array_key_exists('twentytwenty', $themes))
-					return 'twentytwenty';
-				else if(array_key_exists('twentynineteen', $themes))
-					return 'twentynineteen';
-				else if(array_key_exists('twentyeighteen', $themes))
-					return 'twentyeighteen';
-				else if(array_key_exists('twentyseventeen', $themes))
-					return 'twentyseventeen';
-				else if(array_key_exists('twentysixteen', $themes))
-					return 'twentysixteen';
-				else if(array_key_exists('twentyfifteen', $themes))
-					return 'twentyfifteen';
-				else if(array_key_exists('twentyfourteen', $themes))
-					return 'twentyfourteen';
-				else if(array_key_exists('twentythirteen', $themes))
-					return 'twentythirteen';
-				else if(array_key_exists('twentytwelve', $themes))
-					return 'twentytwelve';
-				else if(array_key_exists('twentyeleven', $themes))
-					return 'twentyeleven';
-				else if(array_key_exists('twentyten', $themes))
-					return 'twentyten';
-			
-			// No default themes are installed, so we'll stick with the current active theme.
+		public function ams_disable_theme( $theme ) {
+			$default_theme = ams_get_default_theme_slug();
+			if ( $default_theme ) {
+				return $default_theme;
+			}
+
 			return $theme;
 		}
 		
@@ -2006,6 +2003,51 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			return $data;
 		}
 		
+		private function ams_resolve_category_sort_args( WP_REST_Request $request ) {
+			$orderby = 'name';
+			$order   = 'asc';
+
+			$sort_mapping = array(
+				'sort_by_popularity' => array(
+					'orderby' => 'count',
+					'order'   => 'desc',
+				),
+				'sort_by_name' => array(
+					'orderby' => 'name',
+					'order'   => 'asc',
+				),
+				'sort_by_latest' => array(
+					'orderby' => 'id',
+					'order'   => 'desc',
+				),
+				'sort_by_oldest' => array(
+					'orderby' => 'id',
+					'order'   => 'asc',
+				),
+			);
+
+			$sorting_order = $request->get_param( 'sorting_order' );
+			if ( ! empty( $sorting_order ) && isset( $sort_mapping[ $sorting_order ] ) ) {
+				$orderby = $sort_mapping[ $sorting_order ]['orderby'];
+				$order   = $sort_mapping[ $sorting_order ]['order'];
+			} else {
+				$req_orderby = $request->get_param( 'orderby' );
+				$req_order   = $request->get_param( 'order' );
+
+				if ( ! empty( $req_orderby ) ) {
+					$orderby = $req_orderby;
+				}
+				if ( ! empty( $req_order ) ) {
+					$order = ( 'desc' === strtolower( $req_order ) ) ? 'desc' : 'asc';
+				}
+			}
+
+			return array(
+				'orderby' => $orderby,
+				'order'   => $order,
+			);
+		}
+
 		private function ams_build_category_tree( $flat, $pidKey, $idKey = null ) {
 			$grouped = array();
 			foreach ( $flat as $sub ) {

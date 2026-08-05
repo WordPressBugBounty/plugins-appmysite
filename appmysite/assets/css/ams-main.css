@@ -1,11 +1,11 @@
 @font-face {
   font-family: "Axiforma-Regular";
-  src: url(/wp-content/plugins/appmysite/assets/fonts/Axiforma-Regular2.woff2);
+  src: url(../fonts/Axiforma-Regular2.woff2);
 }
 
 @font-face {
   font-family: "Axiforma-Bold";
-  src: url(/wp-content/plugins/appmysite/assets/fonts/Axiforma-Bold.woff2);
+  src: url(../fonts/Axiforma-Bold.woff2);
 }
 
 .ams-plugin-ui{

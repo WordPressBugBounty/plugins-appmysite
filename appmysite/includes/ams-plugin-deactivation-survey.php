@@ -97,7 +97,7 @@ function ams_deactivation_popup() {
 									$user_email = $current_user->user_email;
 									?>
 									<textarea id="user_reason" class="hidetextarea detailedreason" name="user_reason" ></textarea>
-									<input type="hidden" name="user_email" value="<?php echo $user_email; ?>">
+									<input type="hidden" name="user_email" value="<?php echo esc_attr( $user_email ); ?>">
 									<input type="hidden" name="site_url" value="<?php echo esc_url( get_bloginfo( 'url' ) ); ?>">
 								</form>
 							</div>

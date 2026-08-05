@@ -3,12 +3,13 @@
  * Plugin Name: AppMySite
  * Plugin URI: https://www.appmysite.com
  * Description: This plugin enables WordPress & WooCommerce users to sync their websites with native iOS and Android apps, created on <a href="https://www.appmysite.com/"><strong>www.appmysite.com</strong></a>
- * Version: 3.15.3
+ * Version: 3.15.4
  * Author: AppMySite
  * Text Domain: appmysite
  * Author URI: https://www.appmysite.com
- * Tested up to: 6.9
- * WC tested up to: 10.6.2
+ * Requires PHP: 7.4
+ * Tested up to: 7.0
+ * WC tested up to: 10.7.0
  * WC requires at least: 7.4
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +22,70 @@ if ( ! defined( 'WPINC' ) ) {
 
 if ( ! defined( 'AMS_PLUGIN_DIR' ) ) {
 	define( 'AMS_PLUGIN_DIR', __FILE__ );
+}
+
+/**
+ * Returns the slug of an installed default WordPress theme, or null if none.
+ *
+ * @return string|null
+ */
+function ams_get_default_theme_slug() {
+	if ( defined( 'WP_DEFAULT_THEME' ) ) {
+		$default_theme = wp_get_theme( WP_DEFAULT_THEME );
+		if ( $default_theme->exists() ) {
+			return WP_DEFAULT_THEME;
+		}
+	}
+
+	$fallback_slugs = array(
+		'twentytwentyfive',
+		'twentytwentyfour',
+		'twentytwentythree',
+		'twentytwentytwo',
+		'twentytwentyone',
+		'twentytwenty',
+		'twentynineteen',
+		'twentyeighteen',
+		'twentyseventeen',
+		'twentysixteen',
+		'twentyfifteen',
+		'twentyfourteen',
+		'twentythirteen',
+		'twentytwelve',
+		'twentyeleven',
+		'twentyten',
+	);
+
+	$themes = wp_get_themes();
+	foreach ( $fallback_slugs as $slug ) {
+		if ( array_key_exists( $slug, $themes ) ) {
+			return $slug;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Whether a default WordPress theme is available for safe mode.
+ *
+ * @return bool
+ */
+function ams_has_default_theme() {
+	return null !== ams_get_default_theme_slug();
+}
+
+/**
+ * Current safe mode value from wp-config, or off when not defined.
+ *
+ * @return string 'on' or 'off'
+ */
+function ams_get_safe_mode_value() {
+	if ( defined( 'AMS_SAFE_MODE' ) ) {
+		return AMS_SAFE_MODE;
+	}
+
+	return 'off';
 }
 
 	/*******************************************************************************
