@@ -68,7 +68,8 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 					array(
 						'is_valid' => 'no',
 						'msg'      => 'Unauthorized.',
-					)
+					),
+					403
 				);
 			}
 
@@ -77,16 +78,17 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 					array(
 						'is_valid' => 'no',
 						'msg'      => 'Invalid security token.',
-					)
+					),
+					403
 				);
 			}
 
 			// Get the license key from the POST request
-			if (isset($_POST['ams_license_key'])) {
-				$ams_license_key = sanitize_text_field($_POST['ams_license_key']);
+			if ( isset( $_POST['ams_license_key'] ) && is_string( $_POST['ams_license_key'] ) ) {
+				$ams_license_key = sanitize_text_field( wp_unslash( $_POST['ams_license_key'] ) );
 				
-				// Validate the license key before saving (you can add custom validation here)
-				if (strlen($ams_license_key) > 28 && strlen($ams_license_key) <= 34) {
+				// License keys contain only letters, numbers, and hyphens.
+				if ( 1 === preg_match( '/\A[A-Z0-9-]{29,34}\z/i', $ams_license_key ) ) {
 					try {
 						$config_transformer = new WPConfigTransformer($this->get_config_path());
 						$config_param = $this->get_config_args(array('normalize' => true));
@@ -251,6 +253,16 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 
 		function ams_safe_mode_form_submit() {
 
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error(
+					array(
+						'ams_safe_mode' => ams_get_safe_mode_value(),
+						'msg'           => 'Unauthorized.',
+					),
+					403
+				);
+			}
+
 			if ( ! check_ajax_referer( 'ajax-nonce', 'nonce', false ) ) {
 				wp_send_json_error();
 				wp_die();
@@ -364,4 +376,3 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 	}
 
 }
-

@@ -122,7 +122,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							
 						<!--<label for="ams_insert_footer_priority"><?php _e('AppMySite App Secret Token'); ?></label>-->
 						<div class="ams-apply-input">
-						<input type="text" value="<?php if(defined('AMS_LICENSE_KEY')) {echo(AMS_LICENSE_KEY);} ?>" name="ams_license_key" id="ams_license_key" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXX" />
+							<input type="text" value="<?php echo defined( 'AMS_LICENSE_KEY' ) ? esc_attr( AMS_LICENSE_KEY ) : ''; ?>" name="ams_license_key" id="ams_license_key" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXX" />
 							
 							<?php if(defined('AMS_LICENSE_STATUS')){ if(AMS_LICENSE_STATUS =="Verified"){
 								echo( '<p id="ams_verify_license_status" class="ams-verify-license-status license-status-green">Verified</p>' );

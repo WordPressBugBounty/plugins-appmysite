@@ -126,13 +126,19 @@ function ams_deactivation_popup() {
 
 
 function ams_deactivation_form_submit() {
+	if ( ! current_user_can( 'activate_plugins' ) ) {
+		wp_send_json_error( array( 'msg' => 'Unauthorized.' ), 403 );
+	}
 
 	if ( ! check_ajax_referer( 'ajax-nonce', 'nonce', false ) ) {
 		wp_send_json_error();
 		wp_die();
 	}
 	
-	$form_data   =  wp_parse_args( $_POST['form-data'] ) ; // clean
+	$form_data = array();
+	if ( isset( $_POST['form-data'] ) && is_array( $_POST['form-data'] ) ) {
+		$form_data = wp_parse_args( wp_unslash( $_POST['form-data'] ) );
+	}
 	
 	// Get the selected radio value.
 	$radio_value = isset( $form_data['ams_survey_radios'] ) ? sanitize_text_field($form_data['ams_survey_radios']) : 0;
@@ -182,4 +188,3 @@ function ams_deactivation_form_submit() {
 
 	//wp_die();
 }
-

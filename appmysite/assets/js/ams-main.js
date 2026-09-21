@@ -76,7 +76,7 @@ jQuery('#ams-app-secret-token-form-submit-button').on("click",function (e) {
 	jQuery('#ams_license_key').css('border-color', '');
 	jQuery('#ams_license_validation_error').html("");
 	var ams_license_key = jQuery("input[name=ams_license_key]").val();
-	if ( ams_license_key.length <=28 || ams_license_key.length >34 ){ 
+	if ( ! /^[A-Za-z0-9-]{29,34}$/.test( ams_license_key ) ) {
 		validLicense = false; jQuery('#ams_license_key').css('border-color', '#FF8E8E'); 
 		jQuery('#ams_license_validation_error').html("Please enter a valid license key.");
 	}
@@ -325,7 +325,5 @@ jQuery('#ams-safe-mode-form-submit-button').on("click",function (e) {
 
 	
 });
-
-
 
 

@@ -203,6 +203,9 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 						// update_post_meta for reference
 						if ( empty( $already_redeemed ) && $reward_amount > 0 ) {
 							$results = $order->apply_coupon( $reward_coupon_code );
+							if ( is_wp_error( $results ) ) {
+								throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
+							}
 							update_post_meta( $response->data['id'], '_ams_wc_points_redeemed', $actual_points_to_redeemed );
 							update_post_meta( $response->data['id'], '_ams_wc_points_rewards_discount_code', $reward_coupon_code );
 							update_post_meta( $response->data['id'], '_ams_wc_points_rewards_discount_amount', $reward_amount );
@@ -211,7 +214,11 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 							$order->update_meta_data( '_ams_wc_points_redeemed', $actual_points_to_redeemed );
 							$order->update_meta_data( '_ams_wc_points_rewards_discount_code', $reward_coupon_code );
 							$order->update_meta_data( '_ams_wc_points_rewards_discount_amount', $reward_amount );
-							$order->save();							
+							$order->save();
+
+							if ( $order->has_status( 'processing' ) ) {
+								$this->ams_ls_order_processing( $order->get_id() );
+							}
 
 						}
 					}
@@ -376,6 +383,9 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 					}
 					// Get amount of discount
 					$discount_amount = $order->get_meta( '_ams_wc_points_rewards_discount_amount' );
+					if ( empty( $discount_amount ) ) {
+						return;
+					}
 
 				}
 				WC_Points_Rewards_Manager::decrease_points(
@@ -562,4 +572,3 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 	}
 
 }
-
