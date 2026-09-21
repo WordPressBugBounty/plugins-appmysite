@@ -7,6 +7,10 @@
  * @link       https://appmysite.com
  * @license    http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
+	if ( ! defined( 'ABSPATH' ) ) {
+		exit;
+	}
+
 	$appmysite_safemode_loader = new WPAMSSafeModeLoader();
 	
 	class WPAMSSafeModeLoader
@@ -14,7 +18,8 @@
 		function __construct()
 		{
 			// Only do this if safe mode is activated by querystring.
-			if(isset($_GET['safe_mode']) && $_GET['safe_mode'] == '1')
+			$safe_mode = filter_input( INPUT_GET, 'safe_mode', FILTER_VALIDATE_INT );
+			if( 1 === $safe_mode )
 			{
 				add_filter('template', array($this, 'ams_disable_theme'), 10, 1);
 				add_filter('stylesheet', array($this, 'ams_disable_theme'), 10, 1);
@@ -80,7 +85,7 @@
 			{			
 				$page = 1;
 				$actions['deactivate'] = '<a href="' . wp_nonce_url('plugins.php?action=deactivate&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $page 
-				, 'deactivate-plugin_' . $plugin_file) . '" title="' . esc_attr__('Deactivate this plugin') . ' (safe mode)' . '">' . __('Deactivate') . ' (safe mode)' . '</a>';
+				, 'deactivate-plugin_' . $plugin_file) . '" title="' . esc_attr__( 'Deactivate this plugin', 'appmysite' ) . ' (safe mode)' . '">' . __( 'Deactivate', 'appmysite' ) . ' (safe mode)' . '</a>';
 			}
 			
 			return $actions;

@@ -46,8 +46,8 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 		// adds ams menu item to wordpress admin dashboard
 		function ams_admin_menu() {
 			
-			add_menu_page( __( 'AppMySite Dashboard' ),
-			__( 'AppMySite' ),
+			add_menu_page( __( 'AppMySite Dashboard', 'appmysite' ),
+			__( 'AppMySite', 'appmysite' ),
 			'manage_options',
 			'ams-home',
 			array( &$this, 'ams_admin_menu_page' ),
@@ -268,12 +268,12 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 				wp_die();
 			}
 
-			$form_data = array();
-			if ( isset( $_POST['form-data'] ) && is_array( $_POST['form-data'] ) ) {
-				$form_data = wp_parse_args( wp_unslash( $_POST['form-data'] ) );
-			}
-
-			if ( empty( $form_data['ams_safe_mode'] ) ) {
+			if (
+				! isset( $_POST['form-data'] ) ||
+				! is_array( $_POST['form-data'] ) ||
+				! isset( $_POST['form-data']['ams_safe_mode'] ) ||
+				! is_string( $_POST['form-data']['ams_safe_mode'] )
+			) {
 				wp_send_json_error(
 					array(
 						'ams_safe_mode' => ams_get_safe_mode_value(),
@@ -282,7 +282,7 @@ if ( !class_exists( 'AMS_Admin_Functions' ) ) {
 				);
 			}
 
-			$ams_safe_mode = sanitize_text_field( $form_data['ams_safe_mode'] );
+			$ams_safe_mode = sanitize_text_field( wp_unslash( $_POST['form-data']['ams_safe_mode'] ) );
 
 			if ( ! in_array( $ams_safe_mode, array( 'on', 'off' ), true ) ) {
 				wp_send_json_error(

@@ -16,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function ams_deactivation_popup() {
 	
-			ob_start();
 			?>
 			
 					<!-- Modal HTML -->
@@ -32,26 +31,26 @@ function ams_deactivation_popup() {
 							<div class="modal-body">
 							
 								<form class="deactivation-survey-form" method="POST">
-									<h2><?php esc_html_e( 'Why are you deactivating the plugin?', 'ams' ); ?></h2>
+									<h2><?php esc_html_e( 'Why are you deactivating the plugin?', 'appmysite' ); ?></h2>
 									
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-1">
 											<input type="radio" name="ams_survey_radios" value="1">
-											<?php esc_html_e( "I am deactivating temporarily", 'ams' ); ?>
+											<?php esc_html_e( "I am deactivating temporarily", 'appmysite' ); ?>
 										</label>
 									</div>
 
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-2">
 											<input type="radio" name="ams_survey_radios" value="2">
-											<?php esc_html_e( 'I found a better alternative', 'ams' ); ?>
+											<?php esc_html_e( 'I found a better alternative', 'appmysite' ); ?>
 										</label>
 									</div>
 
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-3">
 											<input type="radio" name="ams_survey_radios" value="3" data-has-field="true">
-											<?php esc_html_e( 'I could not connect my website', 'ams' ); ?>
+											<?php esc_html_e( 'I could not connect my website', 'appmysite' ); ?>
 										</label>
 
 										
@@ -60,35 +59,35 @@ function ams_deactivation_popup() {
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-4">
 											<input type="radio" name="ams_survey_radios" value="4">
-											<?php esc_html_e( 'I could not figure out how the plugin works', 'ams' ); ?>
+											<?php esc_html_e( 'I could not figure out how the plugin works', 'appmysite' ); ?>
 										</label>
 									</div>
 
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-5">
 											<input type="radio" name="ams_survey_radios" value="5">
-											<?php esc_html_e( "I found the service too expensive", 'ams' ); ?>
+											<?php esc_html_e( "I found the service too expensive", 'appmysite' ); ?>
 										</label>
 									</div>
 									
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-6">
 											<input type="radio" name="ams_survey_radios" value="6">
-											<?php esc_html_e( "There is a conflict with other plugins", 'ams' ); ?>
+											<?php esc_html_e( "There is a conflict with other plugins", 'appmysite' ); ?>
 										</label>
 									</div>
 									
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-7">
 											<input type="radio" name="ams_survey_radios" value="7">
-											<?php esc_html_e( "I didn’t get the support I require", 'ams' ); ?>
+											<?php esc_html_e( "I didn’t get the support I require", 'appmysite' ); ?>
 										</label>
 									</div>
 									
 									<div>
 										<label class="ams-field-description" id="ams-survey-radios-8">
 											<input type="radio" name="ams_survey_radios" value="8">
-											<?php esc_html_e( 'Other', 'ams' ); ?>
+											<?php esc_html_e( 'Other', 'appmysite' ); ?>
 										</label>
 									</div>
 
@@ -113,9 +112,6 @@ function ams_deactivation_popup() {
 				</div></div></div></div></div>	
 
 			<?php
-			echo ob_get_clean();
-			// wp_die();
-
 		}
 
 
@@ -137,7 +133,7 @@ function ams_deactivation_form_submit() {
 	
 	$form_data = array();
 	if ( isset( $_POST['form-data'] ) && is_array( $_POST['form-data'] ) ) {
-		$form_data = wp_parse_args( wp_unslash( $_POST['form-data'] ) );
+		$form_data = map_deep( wp_unslash( $_POST['form-data'] ), 'sanitize_text_field' );
 	}
 	
 	// Get the selected radio value.

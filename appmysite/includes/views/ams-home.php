@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     </svg>
             </a> 
 
-            <a target="_blank" href="https://app.appmysite.com/signup/"><svg width="14" height="14.003" viewBox="0 0 14 14.003">
+            <a target="_blank" href="https://app.appmysite.com/sign-up/"><svg width="14" height="14.003" viewBox="0 0 14 14.003">
               <path id="_9110810_external_link_icon" data-name="9110810_external_link_icon" d="M13.127,8.752v3.5A1.75,1.75,0,0,1,11.377,14H1.75A1.75,1.75,0,0,1,0,12.252V2.625A1.75,1.75,0,0,1,1.75.875h3.5v1.75H1.75v9.627h9.627v-3.5ZM12.25,2.988,6.742,8.5,5.5,7.258,11.012,1.75H7.874V0H14V6.126H12.25Z" fill="#5f6578" fill-rule="evenodd"/>
             </svg> Go to Portal</a>
         </div>
@@ -120,8 +120,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         
 						
 							
-						<!--<label for="ams_insert_footer_priority"><?php _e('AppMySite App Secret Token'); ?></label>-->
-						<div class="ams-apply-input">
+							<div class="ams-apply-input">
 							<input type="text" value="<?php echo defined( 'AMS_LICENSE_KEY' ) ? esc_attr( AMS_LICENSE_KEY ) : ''; ?>" name="ams_license_key" id="ams_license_key" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXX" />
 							
 							<?php if(defined('AMS_LICENSE_STATUS')){ if(AMS_LICENSE_STATUS =="Verified"){
@@ -142,16 +141,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
                 <div class="ams-supportlinks">
                   <div class="supportweb">
-                    <a href="https://updates.appmysite.com/en/" target="_blank"></a>
-                    <img src="<?php echo plugins_url().'/appmysite/assets/images/website-link1.png'; ?>" alt="knowledge-base">
+                    <a href="https://updates.appmysite.com/updates" target="_blank"></a>
+	                    <img src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/website-link1.png' ) ); ?>" alt="knowledge-base">
                     <div class="">
                       <h6>What's New</h6>
                       <p>Stay up to date with what’s keeping us busy.</p>
                     </div>
                   </div>
                   <div class="supportweb">
-                    <a href="https://updates.appmysite.com/roadmap/en/" target="_blank"></a>
-                    <img src="<?php echo plugins_url().'/appmysite/assets/images/website-link2.png'; ?>" alt="roadmap">
+                    <a href="https://docs.appmysite.com/" target="_blank"></a>
+	                    <img src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/website-link2.png' ) ); ?>" alt="roadmap">
                     <div class="">
                       <h6>Knowledge base</h6>
                       <p>Find articles that answer your questions.</p>
@@ -159,7 +158,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                   </div>
                   <div class="supportweb">
                     <a href="https://community.appmysite.com/" target="_blank"></a>
-                    <img src="<?php echo plugins_url().'/appmysite/assets/images/website-link3.png'; ?>" alt="support-base">
+	                    <img src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/website-link3.png' ) ); ?>" alt="support-base">
                     <div class="">
                       <h6>Community</h6>
                       <p>Engage with other app builders like yourself.</p>
@@ -167,7 +166,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                   </div>
                   <div class="supportweb">
                     <a target="_blank" href="https://app.appmysite.com/email-support/"></a>
-                    <img src="<?php echo plugins_url().'/appmysite/assets/images/website-link4.png'; ?>" alt="community-icon">
+	                    <img src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/website-link4.png' ) ); ?>" alt="community-icon">
                     <div class="">
                       <h6>Email support</h6>
                       <p>Submit a request and get help from experts.</p>
@@ -216,7 +215,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								}
 
 							?>
-                            <button id="ams_check_button" value="<?php echo plugins_url();?>"><div id="ams-health-check-btn-loader"></div><span id="ams-health-check-btn-text">Check</span></button>
+	                            <button id="ams_check_button" value="<?php echo esc_url( plugins_url() ); ?>"><div id="ams-health-check-btn-loader"></div><span id="ams-health-check-btn-text">Check</span></button>
 							<input type="hidden" id="ams_site_url" name="ams_site_url" value="<?php echo esc_url(site_url());?>">
 							<input type="hidden" id="ams_is_site_woocommerce" name="ams_is_site_woocommerce" value="<?php echo esc_attr( (string) $ams_is_site_woocommerce ); ?>">
 							<input type="hidden" name="ams_license_key" id="input_ams_license_key" value="<?php echo defined( 'AMS_LICENSE_KEY' ) ? esc_attr( AMS_LICENSE_KEY ) : ''; ?>" />
@@ -239,10 +238,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-1">
                                     <div>
                                         <div class="ams-loader ams-hide " ></div>
-										<?php 
-											if($test_http_requests['status']=='good'){echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/approved.png alt=approved>";}
-											else{echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/rejected.png alt=rejected>";}
-										?>
+										<img class="ams-loader-image" style="display: none;" src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/' . ( 'good' === $test_http_requests['status'] ? 'approved.png' : 'rejected.png' ) ) ); ?>" alt="<?php echo esc_attr( 'good' === $test_http_requests['status'] ? 'approved' : 'rejected' ); ?>">
                                     </div>
                                     <div>
                                         
@@ -262,12 +258,12 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-3">
                                     <div>
                                         <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-                                        <?php echo ($test_http_requests['status']=='good') ? __( '<h5 style="display:none;" class="greenstatus">Success</h5>' ) : __( '<h5 style="display:none;" class="redstatus">Failed</h5>' ); ?>
+	                                        <h5 style="display:none;" class="<?php echo esc_attr( 'good' === $test_http_requests['status'] ? 'greenstatus' : 'redstatus' ); ?>"><?php echo esc_html( 'good' === $test_http_requests['status'] ? __( 'Success', 'appmysite' ) : __( 'Failed', 'appmysite' ) ); ?></h5>
                                     </div>
                                 </div>
 								
 								<div class="ams-connectivity-row-2">
-								<p class="ams-test-result-label" style="display:none;"><?php echo ($test_http_requests['status']=='good') ? __( 'Your website is accessible over HTTP.' ) : __( 'Your website is not accessible over HTTP.' ); //echo $test_http_requests['label'];  ?></p>
+									<p class="ams-test-result-label" style="display:none;"><?php echo esc_html( 'good' === $test_http_requests['status'] ? __( 'Your website is accessible over HTTP.', 'appmysite' ) : __( 'Your website is not accessible over HTTP.', 'appmysite' ) ); ?></p>
 								</div>
                                 
                             </div>
@@ -278,10 +274,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-1">
                                     <div>
                                         <div class="ams-loader ams-hide"></div>
-										<?php 
-											if($test_rest_availability['status']=='good'){echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/approved.png alt=approved>";}
-											else{echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/rejected.png alt=rejected>";}
-										?>
+										<img class="ams-loader-image" style="display: none;" src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/' . ( 'good' === $test_rest_availability['status'] ? 'approved.png' : 'rejected.png' ) ) ); ?>" alt="<?php echo esc_attr( 'good' === $test_rest_availability['status'] ? 'approved' : 'rejected' ); ?>">
                                     </div>
                                     <div>
                                         <h5>WordPress API connectivity</h5>
@@ -299,12 +292,12 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-3">
                                     <div>
                                         <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-                                        <?php echo ($test_rest_availability['status']=='good') ? __( '<h5 style="display:none;" class="greenstatus">Success</h5>' ) : __( '<h5 style="display:none;" class="redstatus">Failed</h5>' ); ?>
+	                                        <h5 style="display:none;" class="<?php echo esc_attr( 'good' === $test_rest_availability['status'] ? 'greenstatus' : 'redstatus' ); ?>"><?php echo esc_html( 'good' === $test_rest_availability['status'] ? __( 'Success', 'appmysite' ) : __( 'Failed', 'appmysite' ) ); ?></h5>
                                     </div>
                                 </div>
 								
 								<div class="ams-connectivity-row-2">
-								<p class="ams-test-result-label" style="display:none;"><?php echo ($test_rest_availability['status']=='good') ? __( 'REST API connection established.' ) : __( 'REST API connection not established. Disable all plugins (except this one), use the default theme, and try again.' ); //echo $test_rest_availability['label'];  ?></p>
+									<p class="ams-test-result-label" style="display:none;"><?php echo esc_html( 'good' === $test_rest_availability['status'] ? __( 'REST API connection established.', 'appmysite' ) : __( 'REST API connection not established. Disable all plugins (except this one), use the default theme, and try again.', 'appmysite' ) ); ?></p>
 								</div>
                                 
                             </div>
@@ -315,10 +308,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-1">
                                     <div>
                                         <div class="ams-loader ams-hide"></div>
-                                        <?php 
-											if(get_option( 'permalink_structure' )){echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/approved.png alt=approved>";}
-											else{echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/rejected.png alt=rejected>";}
-										?>
+	                                        <img class="ams-loader-image" style="display: none;" src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/' . ( get_option( 'permalink_structure' ) ? 'approved.png' : 'rejected.png' ) ) ); ?>" alt="<?php echo esc_attr( get_option( 'permalink_structure' ) ? 'approved' : 'rejected' ); ?>">
                                     </div>
                                     <div>
                                         <h5>Pretty links</h5>
@@ -337,66 +327,23 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-3">
                                     <div>
                                         <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-                                        <?php echo got_url_rewrite() ? __( '<h5 style="display:none;" class="greenstatus">Success</h5>' ) : __( '<h5 style="display:none;" class="redstatus">Failed</h5>' ); ?>
+	                                        <h5 style="display:none;" class="<?php echo esc_attr( got_url_rewrite() ? 'greenstatus' : 'redstatus' ); ?>"><?php echo esc_html( got_url_rewrite() ? __( 'Success', 'appmysite' ) : __( 'Failed', 'appmysite' ) ); ?></h5>
                                         <!-- <a href="">See error</a>-->
                                     </div>
                                 </div>
 								<div class="ams-connectivity-row-3">
-									<p class="ams-test-result-label" style="display:none;" > <?php $permalink_structure = got_url_rewrite(); echo $permalink_structure ? __('Permalink structure set correctly.') : __( 'Permalink structure incorrect. Please ensure it is not set to the default ‘Plain’ permalink (?p=123).' ) ?></p>
+										<p class="ams-test-result-label" style="display:none;" > <?php $permalink_structure = got_url_rewrite(); echo esc_html( $permalink_structure ? __( 'Permalink structure set correctly.', 'appmysite' ) : __( 'Permalink structure incorrect. Please ensure it is not set to the default ‘Plain’ permalink (?p=123).', 'appmysite' ) ); ?></p>
 								</div>
                                 
                             </div>
                             
                             
-                            <!--<div class="ams-connectivity-column">
-                                
-                                <div class="ams-connectivity-row-1">
-                                    <div>
-                                        <div class="ams-loader ams-hide"></div>
-										<?php 
-											if(got_url_rewrite()){echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/approved.png alt=approved>";}
-											else{echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/rejected.png alt=rejected>";}
-										?>
-                                    </div>
-                                    <div>
-                                        <h4 class="ams-hide">Pretty permalinks</h4>
-                                        <h5>Pretty permalinks</h5>
-										<p>To use the latest version of the REST API you must be using pretty permalinks in Settings, so that the custom endpoints are supported. Default permalinks will not work.</p>
-                                       
-                                    </div>
-                                </div>
-                                
-                                <!--<div class="ams-connectivity-row-2">
-                                    <div>
-                                        <h4 class="ams-hide">-</h4>
-                                        <h5>0.15s</h5>
-                                    </div>
-                                </div>->
-                                
-                                <div class="ams-connectivity-row-3">
-                                    <div>
-                                        <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-										<?php echo got_url_rewrite() ? __( '<h5 style="display:none;" class="greenstatus">Success</h5>' ) : __( '<h5 style="display:none;" class="redstatus">Failed</h5>' ); ?>
-                                        <!--<a href="">See error</a> ->
-                                    </div>
-                                </div>
-								
-								<div class="ams-connectivity-row-2">
-									<p class="ams-test-result-label" style="display:none;"> <?php  echo got_url_rewrite() ? __('Pretty permalinks are supported.') : __( 'Pretty permalinks are not supported.' ) ?></p>
-								</div>
-                                
-                            </div>-->
-                            
-                            
-                            <div class="ams-connectivity-column">
+	                            <div class="ams-connectivity-column">
                                 
                                 <div class="ams-connectivity-row-1">
                                     <div>
 										<div class="ams-loader ams-hide"></div>
-                                        <?php 
-											if(get_option( 'users_can_register' )){echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/approved.png alt=approved>";}
-											else{echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/rejected.png alt=rejected>";}
-										?>
+	                                        <img class="ams-loader-image" style="display: none;" src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/' . ( get_option( 'users_can_register' ) ? 'approved.png' : 'rejected.png' ) ) ); ?>" alt="<?php echo esc_attr( get_option( 'users_can_register' ) ? 'approved' : 'rejected' ); ?>">
                                     </div>
                                     <div>
                                         <h5>User registration</h5>
@@ -414,11 +361,11 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-3">
                                     <div>
                                         <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-										<?php echo get_option( 'users_can_register' ) ? __( '<h5 style="display:none;" class="greenstatus">Success</h5>' ) : __( '<h5 style="display:none;" class="redstatus">Failed</h5>' ); ?>
+											<h5 style="display:none;" class="<?php echo esc_attr( get_option( 'users_can_register' ) ? 'greenstatus' : 'redstatus' ); ?>"><?php echo esc_html( get_option( 'users_can_register' ) ? __( 'Success', 'appmysite' ) : __( 'Failed', 'appmysite' ) ); ?></h5>
                                     </div>
                                 </div>
 								<div class="ams-connectivity-row-2">
-									<p class="ams-test-result-label" style="display:none;"><?php $users_can_register = get_option( 'users_can_register' ); echo $users_can_register ? __( 'Users will be able to register on your app.' ) : __( 'Users will not be able to register on your app. Enable user registration.' ); ?></p>
+										<p class="ams-test-result-label" style="display:none;"><?php $users_can_register = get_option( 'users_can_register' ); echo esc_html( $users_can_register ? __( 'Users will be able to register on your app.', 'appmysite' ) : __( 'Users will not be able to register on your app. Enable user registration.', 'appmysite' ) ); ?></p>
 								</div>
                                 
                             </div>
@@ -428,10 +375,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-1">
                                     <div>
                                         <div class="ams-loader ams-hide"></div>
-										<?php 
-											if(is_ssl()){echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/approved.png alt=approved>";}
-											else{echo "<img class='ams-loader-image' style='display: none;' src=".plugins_url()."/appmysite/assets/images/rejected.png alt=rejected>";}
-										?>
+										<img class="ams-loader-image" style="display: none;" src="<?php echo esc_url( plugins_url( '/appmysite/assets/images/' . ( is_ssl() ? 'approved.png' : 'rejected.png' ) ) ); ?>" alt="<?php echo esc_attr( is_ssl() ? 'approved' : 'rejected' ); ?>">
 										
                                     </div>
                                     <div>
@@ -445,45 +389,18 @@ if ( ! defined( 'ABSPATH' ) ) {
                                 <div class="ams-connectivity-row-3">
                                     <div>
                                         <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-										<?php $is_ssl = is_ssl(); echo $is_ssl ? __( '<h5 style="display:none;" class="greenstatus">Success</h5>' ) : __( '<h5 style="display:none;" class="redstatus">Failed</h5>' ); ?>
+											<h5 style="display:none;" class="<?php echo esc_attr( is_ssl() ? 'greenstatus' : 'redstatus' ); ?>"><?php echo esc_html( is_ssl() ? __( 'Success', 'appmysite' ) : __( 'Failed', 'appmysite' ) ); ?></h5>
                                     </div>
                                 </div>
 								
 								<div class="ams-connectivity-row-2">
-									<p class="ams-test-result-label" style="display:none;"><?php echo is_ssl() ? __( 'Your website is securely accessible via HTTPS.' ) : __( 'Insecure connection detected. Install a valid SSL certificate.' ); ?></p>
+										<p class="ams-test-result-label" style="display:none;"><?php echo esc_html( is_ssl() ? __( 'Your website is securely accessible via HTTPS.', 'appmysite' ) : __( 'Insecure connection detected. Install a valid SSL certificate.', 'appmysite' ) ); ?></p>
 								</div>
                                 
                             </div>
 							
-							<!--<div class="ams-connectivity-column">                                
-                                <div class="ams-connectivity-row-1">
-                                    <div>
-                                        <div class="ams-loader ams-hide"></div>
-										<img class='ams-loader-image' style='display: none;' src="<?php echo plugins_url().'/appmysite/assets/images/approved.png'; ?>" alt="approved">
-                                    </div>
-                                    <div>
-                                        <h4 class="ams-hide">Wordpress Test 1</h4>
-										<h5>Wordpress Test 1</h5>
-                                        <p>Blogs of website should be public.</p>
-                                    </div>
-                                </div>                                
-                                <div class="ams-connectivity-row-3">
-                                    <div>
-                                        <h4 class="ams-testing-text" style="display:none;">Testing...</h4>
-										<h5 style="display:none;" class="greenstatus">Success</h5>
-                                    </div>
-                                </div>								
-								<div class="ams-connectivity-row-2">
-									    <p class="ams-test-result-label" style="display:none;">Result</p>                                    
-								</div>                                
-                            </div>-->
-                            
-                        </div>
-                    </div>
-                    
-                    <!--<div class="ams-connectivity-troubleshoot">
-                        <img src="<?php echo plugins_url().'/appmysite/assets/images/connectivity-troubleshoot.png'; ?>" alt="connectivity-troubleshoot">
-                    </div>-->
+	                        </div>
+	                    </div>
                     
                     
                 </div>

@@ -38,11 +38,22 @@ jQuery("#ams_check_button").on("click",function(e) {
 
 			jQuery('.ams-connectivity-table').show();	
             var plugin_url = jQuery("#ams_check_button").val();
-			if(jQuery('.ams-connectivity-table').children().length == 5){
-				for(let i=0;i<result.length;i++){							
-					jQuery('.ams-connectivity-table').append("<div class='ams-connectivity-column'><div class='ams-connectivity-row-1'><div><div class='ams-loader ams-hide'></div><img class='ams-loader-image' style='display:none' src="+plugin_url+"/appmysite/assets/images/"+(result[i].status=="success" ? "approved.png alt='approved'": "rejected.png alt='approved'")+"></div><div><h4 class='ams-hide'>Wordpress Test 1</h4><h5>"+result[i].test+"</h5><p>"+result[i].description+"</p></div></div><div class='ams-connectivity-row-3'><div><h4 class='ams-testing-text' style='display:none'>Testing...</h4>"+(result[i].status=="success" ? "<h5 style='display:none;' class='greenstatus'>Success</h5>": "<h5 style='display:none;' class='redstatus'>Failed</h5>")+"</div></div><div class='ams-connectivity-row-2'><p class='ams-test-result-label' style='display:none'>"+result[i].label+"</p></div></div>");
+				if(jQuery('.ams-connectivity-table').children().length == 5){
+					for(let i=0;i<result.length;i++){
+						var is_success = result[i].status === "success";
+						var diagnostic = jQuery("<div class='ams-connectivity-column'><div class='ams-connectivity-row-1'><div><div class='ams-loader ams-hide'></div><img class='ams-loader-image' style='display:none'></div><div><h4 class='ams-hide'>Wordpress Test 1</h4><h5 class='ams-diagnostic-test'></h5><p class='ams-diagnostic-description'></p></div></div><div class='ams-connectivity-row-3'><div><h4 class='ams-testing-text' style='display:none'>Testing...</h4><h5 style='display:none;'></h5></div></div><div class='ams-connectivity-row-2'><p class='ams-test-result-label' style='display:none'></p></div></div>");
+
+						diagnostic.find('.ams-loader-image').attr({
+							src: plugin_url + "/appmysite/assets/images/" + (is_success ? "approved.png" : "rejected.png"),
+							alt: is_success ? "approved" : "rejected"
+						});
+						diagnostic.find('.ams-diagnostic-test').text(result[i].test);
+						diagnostic.find('.ams-diagnostic-description').text(result[i].description);
+						diagnostic.find('.ams-connectivity-row-3 h5').addClass(is_success ? 'greenstatus' : 'redstatus').text(is_success ? 'Success' : 'Failed');
+						diagnostic.find('.ams-test-result-label').text(result[i].label);
+						jQuery('.ams-connectivity-table').append(diagnostic);
+					}
 				}
-			}
 			jQuery('#ams-health-check-btn-text').html("Check");
 			jQuery('#ams-health-check-btn-loader').removeClass("ams-health-check-btn-loader");
 			jQuery(".ams-loader").addClass("ams-hide");
@@ -110,7 +121,7 @@ jQuery('#ams-app-secret-token-form-submit-button').on("click",function (e) {
 					jQuery('#ams_verify_license_status').html("Verified");
 					jQuery('#ams_verify_license_status').removeClass("license-status-red");
 					jQuery('#ams_verify_license_status').addClass("license-status-green");
-					jQuery('#ams_license_validation_error').html(responseFromSubmit.msg);
+					jQuery('#ams_license_validation_error').text(responseFromSubmit.msg);
 					jQuery('#ams_license_validation_error').removeClass("license-status-red");
 					jQuery('#ams_license_validation_error').addClass("license-status-green");
 
@@ -146,7 +157,7 @@ jQuery('#ams-app-secret-token-form-submit-button').on("click",function (e) {
 					jQuery('#ams_verify_license_status').removeClass("license-status-green");
 					jQuery('#ams_verify_license_status').addClass("license-status-red");
 					jQuery('#ams_license_key').css('border-color', '#FF8E8E'); 
-					jQuery('#ams_license_validation_error').html(responseFromSubmit.msg);	
+					jQuery('#ams_license_validation_error').text(responseFromSubmit.msg);
 						
 					jQuery('#ams-license-submit-text').html("Submit");
 					jQuery('#ams-license-submit-loader').removeClass("ams-license-submit-loader");
@@ -325,5 +336,3 @@ jQuery('#ams-safe-mode-form-submit-button').on("click",function (e) {
 
 	
 });
-
-

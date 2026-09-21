@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !class_exists( 'AMS_Filters' ) ) {
 		
 	final class AMS_Filters{
+
+		private $ams_virtual_coupons = array();
 		
 		/**
 		 * AMS_Filters Constructor.
@@ -70,6 +72,7 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 			if ( ! isset( $caps[0] ) || $caps[0] != 'pay_for_order' ) {
 				return $allcaps;
 			}
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The order key authenticates public WooCommerce payment links.
 			if ( ! isset( $_GET['key'] ) ) {
 				return $allcaps;
 			}
@@ -78,6 +81,7 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 				return $allcaps;
 			}
 			$order_key                = $order->get_order_key();
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The order key authenticates public WooCommerce payment links.
 			$order_key_check          = sanitize_text_field( wp_unslash( $_GET['key'] ) );
 			$allcaps['pay_for_order'] = ( $order_key == $order_key_check );
 			return $allcaps;
@@ -88,19 +92,19 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 
 			if ( isset( $current_section ) ) {
 				$settings[] = array(
-					'name'     => __( 'AMS WC Default Catalog Orderby Settings', 'woocommerce' ),
+					'name'     => __( 'AMS WC Default Catalog Orderby Settings', 'appmysite' ),
 					'id'       => 'woocommerce_default_catalog_orderby',
 					'label'    => 'Woocommerce Default Catalog Orderby',
 					'type'     => 'select',
-					'desc'     => __( 'This setting determines the sorting order of products in the catalog.', 'woocommerce' ),
+					'desc'     => __( 'This setting determines the sorting order of products in the catalog.', 'appmysite' ),
 					'desc_tip' => true,
 					'options'  => array(
-						'price'      => __( 'Sort by price (asc)', 'woocommerce' ),
-						'date'       => __( 'Sort by most recent', 'woocommerce' ),
-						'rating'     => __( 'Average rating', 'woocommerce' ),
-						'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
-						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
-						'price-desc' => __( 'Sort by price (desc)', 'woocommerce' ),
+						'price'      => __( 'Sort by price (asc)', 'appmysite' ),
+						'date'       => __( 'Sort by most recent', 'appmysite' ),
+						'rating'     => __( 'Average rating', 'appmysite' ),
+						'popularity' => __( 'Popularity (sales)', 'appmysite' ),
+						'menu_order' => __( 'Default sorting (custom ordering + name)', 'appmysite' ),
+						'price-desc' => __( 'Sort by price (desc)', 'appmysite' ),
 					),
 					'default'  => '',
 					'value'    => get_option( 'woocommerce_default_catalog_orderby' ),
@@ -115,11 +119,11 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 		public function ams_ls_wc_get_cart_url( $settings ) {
 				
 			$settings[] = array(
-				'name'     => __( 'AMS WC Cart Page URL', 'woocommerce' ),
+				'name'     => __( 'AMS WC Cart Page URL', 'appmysite' ),
 				'id'       => 'ams_wc_cart_url',
 				'label'    => 'Woocommerce cart page URL.',
 				'type'     => 'select',
-				'desc'     => __( 'This setting determines the cart page url of store.', 'woocommerce' ),				
+				'desc'     => __( 'This setting determines the cart page url of store.', 'appmysite' ),
 				'default'  => wc_get_cart_url()
 			);
 			return $settings;
@@ -196,15 +200,17 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 						$customer_id                       = $request->get_param( 'customer_id' );
 						$line_items                        = $request->get_param( 'line_items' );
 						$reward_amount                     = $this->ams_get_points_rewards_discount_amount( $customer_id, $wc_points_rewards_discount_amount, $line_items ); // to be calculated
-						$reward_coupon_code                = sprintf( 'wc_points_redemption_%s_%s_@%f', $customer_id, date( 'Y_m_d_h_i', current_time( 'timestamp' ) ), $reward_amount );
+						$reward_coupon_code                = sprintf( 'wc_points_redemption_%s_%s_@%f', $customer_id, gmdate( 'Y_m_d_h_i', current_time( 'timestamp' ) ), $reward_amount );
 						// get actual point to be logged on the basis of allowed reward amount.
 						$actual_points_to_redeemed = WC_Points_Rewards_Manager::calculate_points_for_discount( $reward_amount );
 
 						// update_post_meta for reference
 						if ( empty( $already_redeemed ) && $reward_amount > 0 ) {
+							$this->ams_virtual_coupons[ $reward_coupon_code ] = $reward_amount;
 							$results = $order->apply_coupon( $reward_coupon_code );
+							unset( $this->ams_virtual_coupons[ $reward_coupon_code ] );
 							if ( is_wp_error( $results ) ) {
-								throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
+								throw new WC_REST_Exception( esc_attr( 'woocommerce_rest_' . $results->get_error_code() ), esc_html( $results->get_error_message() ), 400 );
 							}
 							update_post_meta( $response->data['id'], '_ams_wc_points_redeemed', $actual_points_to_redeemed );
 							update_post_meta( $response->data['id'], '_ams_wc_points_rewards_discount_code', $reward_coupon_code );
@@ -230,13 +236,13 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 						if ( is_array( $item ) ) {
 							if ( isset( $item['id'] ) ) {
 								if ( ! isset( $item['code'] ) ) {
-									throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+									throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', esc_html__( 'Coupon code is required.', 'appmysite' ), 400 );
 								}
 								$order   = wc_get_order( $response->data['id'] );
 								$results = $order->apply_coupon( wc_clean( $item['code'] ) );
 
 								if ( is_wp_error( $results ) ) {
-									throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
+									throw new WC_REST_Exception( esc_attr( 'woocommerce_rest_' . $results->get_error_code() ), esc_html( $results->get_error_message() ), 400 );
 								}
 								return $response;
 							}
@@ -272,6 +278,7 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 
 		public function ams_ls_catalog_hidden_products_search_query_fix( $query = false ) {
 			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This only identifies the current read-only REST route.
 			$rest_route  = isset( $_GET['rest_route'] ) ? sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) : '';
 			$route_path  = $rest_route ? $rest_route : $request_uri;
 
@@ -306,43 +313,31 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 			if ( is_admin() ) {
 				return $false;
 			}
-				$coupon_code_valid = false;
-				$coupon_settings   = null;
-				$coupon_amount     = 0;
-			if ( $this->ams_is_coupon_code_valid( $data ) ) {
-				$coupon_code_valid = true;
-			}
-			if ( ( $pos = strpos( $data, '@' ) ) !== false ) {
-				$coupon_amount = (float) substr( $data, $pos + 1 );
-			}
-			// Create a coupon with the properties you need
-			if ( $coupon_code_valid ) {
-				$coupon_settings = array(
-					'id'                         => true,
-					'discount_type'              => 'fixed_cart', // 'fixed_cart', 'percent' or 'fixed_product'
-					'amount'                     => $coupon_amount, // value or percentage.
-					'expiry_date'                => date( 'Y-m-d', strtotime( 'tomorrow' ) ), // YYYY-MM-DD
-					'individual_use'             => false,
-					'product_ids'                => array(),
-					'exclude_product_ids'        => array(),
-					'usage_limit'                => '1',
-					'usage_limit_per_user'       => '1',
-					'limit_usage_to_x_items'     => '',
-					'usage_count'                => '',
-					'free_shipping'              => false,
-					'product_categories'         => array(),
-					'exclude_product_categories' => array(),
-					'exclude_sale_items'         => false,
-					'minimum_amount'             => '',
-					'maximum_amount'             => '',
-					'customer_email'             => array(),
-				);
 
-				return $coupon_settings;
-			} else {
-				return false;
+			if ( ! isset( $this->ams_virtual_coupons[ $data ] ) ) {
+				return $false;
 			}
 
+			return array(
+				'id'                         => true,
+				'discount_type'              => 'fixed_cart',
+				'amount'                     => (float) $this->ams_virtual_coupons[ $data ],
+				'expiry_date'                => gmdate( 'Y-m-d', strtotime( 'tomorrow' ) ),
+				'individual_use'             => false,
+				'product_ids'                => array(),
+				'exclude_product_ids'        => array(),
+				'usage_limit'                => '1',
+				'usage_limit_per_user'       => '1',
+				'limit_usage_to_x_items'     => '',
+				'usage_count'                => '',
+				'free_shipping'              => false,
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'exclude_sale_items'         => false,
+				'minimum_amount'             => '',
+				'maximum_amount'             => '',
+				'customer_email'             => array(),
+			);
 		}
 	
 		public function ams_ls_order_processing( $order_id ) {
@@ -352,13 +347,13 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 				apply_filters( 'active_plugins', get_option( 'active_plugins' ) )
 			)
 			) { 
-				$order       = wc_get_order( $order_id );
-				// order-redeem
-				$already_redeemed  = $order->get_meta('_wc_points_redeemed', true);	//get_post_meta( $order_id, '_wc_points_redeemed', true );		//HPOS
-				$logged_redemption = $order->get_meta('_wc_points_logged_redemption', true);	//get_post_meta( $order_id, '_wc_points_logged_redemption', true );		//HPOS
+				$order = wc_get_order( $order_id );
+				if ( ! $order ) {
+					return;
+				}
 
-				// Points has already been redeemed
-				if ( ! empty( $already_redeemed ) ) {
+				// The logged redemption is the definitive marker that points were deducted.
+				if ( ! empty( $order->get_meta( '_wc_points_logged_redemption', true ) ) ) {
 					return;
 				}
 				
@@ -370,24 +365,16 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 				}
 
 				$discount_code = $order->get_meta( '_ams_wc_points_rewards_discount_code' );
-
-				if ( ! empty( $logged_redemption ) ) {
-					$points_redeemed = $logged_redemption['points'];
-					$discount_amount = $logged_redemption['amount'];
-					$discount_code   = $logged_redemption['discount_code'];
-				} else {
-					$points_redeemed = $order->get_meta( '_ams_wc_points_redeemed' );
-					// bail if ams is not involved
-					if ( ! $points_redeemed ) {
-						return;
-					}
-					// Get amount of discount
-					$discount_amount = $order->get_meta( '_ams_wc_points_rewards_discount_amount' );
-					if ( empty( $discount_amount ) ) {
-						return;
-					}
-
+				$points_redeemed = $order->get_meta( '_ams_wc_points_redeemed' );
+				if ( ! $discount_code || ! $points_redeemed ) {
+					return;
 				}
+
+				$discount_amount = $order->get_meta( '_ams_wc_points_rewards_discount_amount' );
+				if ( empty( $discount_amount ) ) {
+					return;
+				}
+
 				WC_Points_Rewards_Manager::decrease_points(
 					$customer_id,
 					$points_redeemed,
@@ -420,7 +407,7 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 
 				// add order note
 				/* translators: 1: points earned 2: points label 3: discount amount */
-				$order->add_order_note( sprintf( __( '%1$d %2$s redeemed for a %3$s discount.', 'woocommerce-points-and-rewards' ), $points_redeemed, $this->ams_get_points_label( $points_redeemed ), wc_price( $discount_amount ) ) );
+				$order->add_order_note( sprintf( __( '%1$d %2$s redeemed for a %3$s discount.', 'appmysite' ), $points_redeemed, $this->ams_get_points_label( $points_redeemed ), wc_price( $discount_amount ) ) );
 				
 				$order->save();		//HPOS
 
@@ -546,13 +533,6 @@ if ( !class_exists( 'AMS_Filters' ) ) {
 			return 1 == $count ? $singular : $plural;
 		}
 		
-		public function ams_is_coupon_code_valid( $coupon_code ) {
-			if ( 0 === strpos( $coupon_code, 'wc_points_redemption_' ) ) {
-				return true;
-			}
-			return false;
-		}
-
 		public function ams_calculate_discount_modifier( $percentage ) {
 
 			$percentage = str_replace( '%', '', $percentage ) / 100;

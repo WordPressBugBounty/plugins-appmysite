@@ -576,9 +576,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 
 			$user = get_user_by( 'ID', apply_filters('determine_current_user', false) ); // | User by ID 
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				$user->data->user_pass = '';
@@ -610,7 +610,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				'hide_empty' => $hide_empty,
 			);
 
-			$product_categories             = array_values( get_terms( 'product_cat', $cat_args ) );
+			$cat_args['taxonomy']            = 'product_cat';
+			$product_categories             = array_values( get_terms( $cat_args ) );
 			$array_product_categories_items = json_decode( json_encode( $product_categories ), true );
 			if ( empty( $array_product_categories_items ) ) {
 				return rest_ensure_response( $array_product_categories_items );
@@ -631,7 +632,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				'hide_empty' => $hide_empty,
 			);
 
-			$product_categories             = array_values( get_terms( 'category', $cat_args ) );
+			$cat_args['taxonomy']            = 'category';
+			$product_categories             = array_values( get_terms( $cat_args ) );
 			$array_product_categories_items = json_decode( json_encode( $product_categories ), true );
 			if ( empty( $array_product_categories_items ) ) {
 				return rest_ensure_response( $array_product_categories_items );
@@ -980,9 +982,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$user       = wp_authenticate( sanitize_text_field( $req['username'] ), sanitize_text_field( $req['password'] ) );  // htmlspecialchars
 
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				$user->data->user_pass  = '';
@@ -1023,9 +1025,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			}
 			
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				
@@ -1072,7 +1074,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			$order    = wc_get_order( $order_id );  // Returns WC_Product|null|false
 			if ( ! isset( $order ) || $order == false ) {
 				$error = new WP_Error();
-				$error->add( 'message', __( 'The order ID appears to be invalid. Please try again.' ) );
+				$error->add( 'message', __( 'The order ID appears to be invalid. Please try again.', 'appmysite' ) );
 				return $error;
 			}  // Verify Valid Order ID
 			
@@ -1082,7 +1084,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			if (!current_user_can('manage_options') && $order_customer_id != $current_user_id) {
 				return new WP_Error(
 					'rest_forbidden',
-					__('You do not have permission to access this order.'),
+					__( 'You do not have permission to access this order.', 'appmysite' ),
 					array('status' => 403)
 				);
 			}
@@ -1096,9 +1098,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			$user_id = sanitize_text_field($request->get_param('user_id'));
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				$user->data->user_pass = '';
@@ -1147,7 +1149,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$user  = get_user_by( 'email', $email );
 			if ( ! $user ) {
 				$error = new WP_Error();
-				$error->add( 'message', __( 'The email address appears to be incorrect. Please try again.' ) );
+				$error->add( 'message', __( 'The email address appears to be incorrect. Please try again.', 'appmysite' ) );
 				return $error;
 			}
 				$firstname  = $user->first_name;
@@ -1156,9 +1158,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				$retrieve_password = retrieve_password($user_login);
 				
 				if ( isset( $retrieve_password->errors ) ) {
-					$error_message = strip_tags( $this->ams_convert_error_to_string( $retrieve_password->errors ) );
+					$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $retrieve_password->errors ) );
 					$error = new WP_Error();
-					$error->add( 'message', __( $error_message . '' ) );
+					$error->add( 'message', $error_message );
 					return $error;
 				}
 				
@@ -1191,7 +1193,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 					if ( $current_user_id !== $customer_id && ! current_user_can( 'manage_options' ) ) {
 						return new WP_Error(
 							'rest_forbidden',
-							__( 'You do not have permission to access this user\'s data.' ),
+							__( 'You do not have permission to access this user\'s data.', 'appmysite' ),
 							array( 'status' => 403 )
 						);
 					}
@@ -1312,7 +1314,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				if ( $available_user_discount <= 0 ) {
 					// return 0;
 					$error = new WP_Error();
-					$error->add( 'message', __( 'No reward point available.' ) );
+					$error->add( 'message', __( 'No reward point available.', 'appmysite' ) );
 					return $error;
 				}
 
@@ -1328,7 +1330,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 				if ( $minimum_discount > $available_user_discount ) {
 					// return 0;
 					$error = new WP_Error();
-					$error->add( 'message', __( 'Please enter atleast '.$minimum_discount.' points global minimum discount error.' ) );
+					/* translators: %s: minimum reward points required. */
+					$error->add( 'message', sprintf( __( 'Please enter at least %s points to meet the global minimum discount.', 'appmysite' ), $minimum_discount ) );
 					return $error;
 				}
 
@@ -1429,7 +1432,8 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 
 				if ( $max_discount && $max_discount < $discount_applied ) {
 					$error = new WP_Error();
-					$error->add( 'message', __( 'You cannot enter more than '.$max_discount.' points.' ) );
+					/* translators: %s: maximum reward points allowed. */
+					$error->add( 'message', sprintf( __( 'You cannot enter more than %s points.', 'appmysite' ), $max_discount ) );
 					return $error;
 					//$discount_applied = $max_discount;
 				}
@@ -1494,18 +1498,18 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			$user = get_user_by( 'id', $customer_id );
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			}
 			
 			$x = wp_check_password( $old_password, $user->data->user_pass, $user->data->ID );
 			
 			if ( isset( $x->errors ) ) {
-				$error_message = strip_tags( ams_convert_error_to_string( $x->errors ) );
+				$error_message = wp_strip_all_tags( ams_convert_error_to_string( $x->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			}		
 			if($x)
@@ -1664,9 +1668,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			$user = get_user_by('ID', $user_id);
 			
 			if (isset($user->errors)) {
-				$error_message = strip_tags($this->ams_convert_error_to_string($user->errors));
+				$error_message = wp_strip_all_tags($this->ams_convert_error_to_string($user->errors));
 				$error = new WP_Error();
-				$error->add('message', __($error_message . ''));
+				$error->add('message', $error_message);
 				return $error;
 			} elseif (isset($user->data)) {
 				// implement wishlist
@@ -1710,9 +1714,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			// Get user object
 			$user = get_user_by('ID', $user_id);
 			if (isset($user->errors)) {
-				$error_message = strip_tags($this->ams_convert_error_to_string($user->errors));
+				$error_message = wp_strip_all_tags($this->ams_convert_error_to_string($user->errors));
 				$error = new WP_Error();
-				$error->add('message', __($error_message . ''));
+				$error->add('message', $error_message);
 				return $error;
 			} elseif (isset($user->data)) {
 				// Retrieve current wishlist from user meta
@@ -1758,9 +1762,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				//implement wishlist 
@@ -1790,9 +1794,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				//implement bookmark 				
@@ -1862,9 +1866,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				//implement bookmark 
@@ -1921,9 +1925,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				//implement bookmarks
@@ -1974,9 +1978,9 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			$user = get_user_by( 'ID', $user_id ); // | ID | slug | email | login.
 			if ( isset( $user->errors ) ) {
-				$error_message = strip_tags( $this->ams_convert_error_to_string( $user->errors ) );
+				$error_message = wp_strip_all_tags( $this->ams_convert_error_to_string( $user->errors ) );
 				$error         = new WP_Error();
-				$error->add( 'message', __( $error_message . '' ) );
+				$error->add( 'message', $error_message );
 				return $error;
 			} elseif ( isset( $user->data ) ) {
 				//implement wishlist 
@@ -2146,7 +2150,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		if ( $current_user_id === 0 ) {
 			return new WP_Error(
 				'rest_not_logged_in',
-				__( 'You must be logged in to access this endpoint.' ),
+				__( 'You must be logged in to access this endpoint.', 'appmysite' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -2164,7 +2168,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 		if ( empty( $user_id ) ) {
 			return new WP_Error(
 				'rest_missing_user_id',
-				__( 'user_id parameter is required for this endpoint.' ),
+				__( 'user_id parameter is required for this endpoint.', 'appmysite' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -2181,7 +2185,7 @@ if ( !class_exists( 'AMS_Rest_Routes' ) ) {
 			
 			return new WP_Error(
 				'rest_forbidden',
-				__('You do not have permission to access this user\'s data.'),
+				__( 'You do not have permission to access this user\'s data.', 'appmysite' ),
 				array('status' => 403)
 			);
 		}

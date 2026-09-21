@@ -3,7 +3,7 @@
  * Plugin Name: AppMySite
  * Plugin URI: https://www.appmysite.com
  * Description: This plugin enables WordPress & WooCommerce users to sync their websites with native iOS and Android apps, created on <a href="https://www.appmysite.com/"><strong>www.appmysite.com</strong></a>
- * Version: 3.15.5
+ * Version: 3.15.6
  * Author: AppMySite
  * Text Domain: appmysite
  * Author URI: https://www.appmysite.com
@@ -190,8 +190,9 @@ function ams_get_safe_mode_value() {
 			$messsage = 'Unable to update AMS_SAFE_MODE in wp-config. - ' . $e->getMessage();
 			wp_die( esc_html( $messsage ) );
 		}
-		if(file_exists(WP_CONTENT_DIR . '/mu-plugins/safe-mode-loader.php'))
-			@unlink(WP_CONTENT_DIR . '/mu-plugins/safe-mode-loader.php');		
+		if ( file_exists( WP_CONTENT_DIR . '/mu-plugins/safe-mode-loader.php' ) ) {
+			wp_delete_file( WP_CONTENT_DIR . '/mu-plugins/safe-mode-loader.php' );
+		}
 		
 	}
 	
